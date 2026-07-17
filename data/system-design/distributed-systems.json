@@ -1,0 +1,56 @@
+{
+  "id": "distributed-systems",
+  "title": "Distributed Systems",
+  "description": "Coordination, consistency and failure handling across multiple services and nodes.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What does it mean for an operation to be idempotent, and why does at-least-once message delivery force idempotency onto consumers?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q2",
+      "question": "Why is 'exactly-once delivery' considered practically impossible in distributed messaging, and what do systems do instead to get exactly-once *processing*?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q3",
+      "question": "An order service must update its own database AND publish an 'order created' event. Why is doing these as two separate steps dangerous, and how does the outbox pattern fix it?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q4",
+      "question": "Compare two-phase commit and the saga pattern for a transaction spanning multiple services. Why do microservice architectures usually prefer sagas?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q5",
+      "question": "Why can't you trust wall-clock timestamps to order events across machines, and what alternatives exist (e.g. logical clocks)?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q6",
+      "question": "What is leader election and why do distributed systems need it? Sketch how a system like ZooKeeper, etcd or Raft-based clusters make it safe.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q7",
+      "question": "Design a distributed rate limiter for an API served by 20 instances. Where does the counting state live, and what accuracy vs latency trade-offs do different designs make?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}

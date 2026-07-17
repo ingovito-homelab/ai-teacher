@@ -1,0 +1,227 @@
+{
+  "id": "core",
+  "title": "Core Java",
+  "description": "Core Java: language semantics, collections, concurrency and the JVM.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the difference between `==` and `.equals()` when comparing objects in Java, and why can `==` appear to work for small Integer values?",
+      "answer": "== compares objects by reference, so if the 2 objects mut have the same reference to get == true. \nequals compares by value.\n\nJVM caches integers from -127 to 128 to have the same references thus comparing integers in that range by == will give us true. Outside of that range it will return false.",
+      "evaluation": {
+        "score": "7/10",
+        "verdict": "Good",
+        "feedback": "The core distinction is right: == compares references, equals() compares logical value (when overridden). The Integer cache explanation is also the right mechanism — autoboxing goes through Integer.valueOf(), which returns cached instances in a fixed range. Two corrections. First, the range is -128 to 127 inclusive (you had the bounds off by one on both ends); the upper bound is also configurable with -XX:AutoBoxCacheMax. Second, a nuance: equals() only 'compares by value' if the class overrides it — the default Object.equals() is exactly the same as ==. And outside the cache range == isn't guaranteed false in general, only for independently autoboxed values; two variables pointing at the same Integer object still compare true."
+      },
+      "followUp": "What does .equals() actually compare for a class that never overrides it, and given that, why does `new Integer(5) == Integer.valueOf(5)` return false even though 5 is inside the cache range?",
+      "hidden": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q2",
+      "question": "Explain the contract between `equals()` and `hashCode()`. What concretely breaks if you override one but not the other and use the object as a `HashMap` key?",
+      "answer": "Contract says that hash collisions happens - sooo, if 2 objects are equal - hashCode should produce the same hash. \nBut if 2 objects have the same hash - it doesnt mean they're equal. \n\nHashMap relies on hashCode when creating it's key and equals when comparing the key. \nSo HashMap creates a hashCode and then use equals to check if there're matching elements. ",
+      "evaluation": {
+        "score": "6/10",
+        "verdict": "Partially correct",
+        "feedback": "The contract itself is stated correctly in both directions: equal objects must have equal hashCodes, but equal hashCodes do not imply equal objects (collisions are allowed). The HashMap mechanics are also right: hashCode picks the bucket, equals() finds the matching entry within it. What's missing is the concrete failure the question asked for. If you override equals() but not hashCode(), two logically equal objects get the default identity-based hashCodes, land in different buckets, and map.get(equalKey) returns null even though an 'equal' key is in the map — you also get silent duplicates in a HashSet. The reverse case (hashCode without equals) means colliding keys are compared by identity, so lookups with a new-but-equal key also fail. Naming that concrete symptom is the difference between reciting the contract and understanding it."
+      },
+      "followUp": "Suppose equals() and hashCode() are both correctly overridden, but they use a mutable field — and after putting the object into a HashMap as a key, you mutate that field. What happens on the next get() with that same object, and why can't the map recover?",
+      "hidden": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q3",
+      "question": "Compare `ArrayList` and `LinkedList`: how does each store elements, and why does `ArrayList` usually win in practice even for insert-heavy workloads?",
+      "answer": "ArrayList base it's implementation on array - we just add element to the array and we can grab it by it's index with o(1) complexity. \nLinkedList links elements one to another. To get to the particular element we have to iterate through the whole list. \n\nWhy array wins? Array elements are stored contiguously. It's cache friendly - Reading one element often loads nearby elements into the CPU cache. \n\nLinkedList allocates a separate object for every element, plus two references (prev and next), increasing memory usage and GC pressure.",
+      "evaluation": {
+        "score": "8/10",
+        "verdict": "Good",
+        "feedback": "Strong answer — this names the real reasons, not the textbook ones: contiguous storage, CPU cache friendliness, and LinkedList's per-node allocation with prev/next references driving memory overhead and GC pressure. The storage models and O(1) index access are correct too. What's missing is closing the loop on the insert-heavy claim specifically: LinkedList's advertised O(1) insert only holds once you're already at the position, and getting there is an O(n) pointer-chasing traversal with a cache miss per node — while ArrayList's O(n) shift is a bulk copy of contiguous memory (System.arraycopy), which is extremely fast per element. Also worth knowing: ArrayList append is amortized O(1) because the backing array grows by ~1.5x, not by 1."
+      },
+      "followUp": "Is there any realistic workload where LinkedList actually beats ArrayList in practice? Consider its role as a Deque, and what happens when you remove elements via an Iterator while walking the list.",
+      "hidden": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q4",
+      "question": "What does the `volatile` keyword guarantee, and what does it NOT guarantee? Give an example where `volatile` alone is insufficient and you need synchronization or an atomic class.",
+      "answer": "Volatile guarantee that the memory that field is written to is persisted between threads. It doesn't guarantee atomicity of the operation eg. ++var. For that you need atomicInteger. ",
+      "evaluation": {
+        "score": "7/10",
+        "verdict": "Good",
+        "feedback": "The structure of the answer is right: volatile is about cross-thread visibility, it does NOT make compound operations atomic, var++ is the classic counterexample (it is a read-modify-write of three steps, so two threads can both read the same old value), and AtomicInteger is the correct fix. Two refinements. Terminology: say 'visibility', not 'persistence' — a write to a volatile field is guaranteed to be seen by any subsequent read of that field from another thread (no thread caches a stale copy); nothing is persisted anywhere. And the second, often-forgotten guarantee: volatile establishes ordering (happens-before) — the compiler and CPU may not reorder writes that precede the volatile write past it, which is exactly what makes 'set data, then set volatile flag' patterns safe."
+      },
+      "followUp": "Thread A fills a plain (non-volatile) field `data` and then sets `volatile boolean ready = true`. Thread B loops until it sees ready == true and then reads `data`. Is B guaranteed to see the value A wrote to `data`, and which volatile guarantee makes that so?",
+      "hidden": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q5",
+      "question": "Walk through how garbage collection works in the JVM at a high level: what is generational collection, why are most objects collected cheaply, and what causes a stop-the-world pause?",
+      "answer": "So Garbage collector works by checking if references are still in use in the application. Newly created objects are stored in a young generation, at first we do a couple of check and we only move survivors - because moving items is expensive. But if we move a small amount of references, the rest is removed by wiping out the whole area. Most objects are collected at the beginning (in the younger generation) so it's cheap. Stop-the-world is the situation when garbage collector has to stop every thread in the app to move the objects (or get rid of them) - within all generations so it must be stop so the thread won't mutate an object that should be moved.",
+      "evaluation": {
+        "score": "8/10",
+        "verdict": "Good",
+        "feedback": "Big improvement over the first attempt — this now covers all three parts correctly. New objects allocated in the young generation, only survivors get copied out and the whole region is then wiped (so cost is proportional to survivors, and dead objects are free to reclaim), most objects die young so young collections are cheap, and stop-the-world exists because application threads must not mutate or read objects while the collector is moving them. Two sharpenings. First, 'checking if references are still in use' deserves precision: the GC traces reachability starting from GC roots (thread stacks, static fields, JNI references) — anything not reachable from a root is garbage, which is why two dead objects referencing each other still get collected. Second, not every STW pause is equal: young-generation pauses are frequent but short, while the classic long pause is a full collection that compacts the old generation — that's the one modern collectors like G1 and ZGC are built to shrink."
+      },
+      "followUp": "You said the GC checks whether references are 'still in use'. Where exactly does that trace start — what are GC roots (name two or three) — and why does an object cycle (A references B, B references A, nothing else references either) still get collected?",
+      "hidden": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q6",
+      "question": "Why is `String` immutable in Java, and what is the string pool? What is the difference between `\"abc\"` and `new String(\"abc\")`?",
+      "answer": "String pool is the place in the heap where all strings literal are kept. So if we create a new string without new - it will use the same object so \"abc\" == \"abc\". Why String is immutable, because it caches its hashCode which is used then in the HashMap. If String was mutable then elements could be found in the hashMap (keys could navigate to a different bucket)\n\nit's immutable also from a security perspective, we prevent SQL injections etc. In general we know that once evaluated / validated string won't be changed again. so immutability of String is main core of java. The difference between abc and new String(\"abc\") is that they won't be equal checking by reference because String(\"Abc\") will enfore to create a new heap object.",
+      "evaluation": {
+        "score": "8/10",
+        "verdict": "Good",
+        "feedback": "Big improvement over the previous attempt — all three parts are now addressed. The pool is described correctly (a heap area holding string literals; every use of the same literal resolves to the same object, so \"abc\" == \"abc\" is true), the hashCode-caching argument for immutability is right, and the security argument (a once-validated string cannot change afterwards) is right too. new String(\"abc\") forcing a fresh heap object, hence reference-unequal, is also correct. Two slips: you wrote that with a mutable String 'elements could be found in the hashMap' — you meant could NOT be found (the mutated key would hash to a different bucket and become unreachable); and immutability does not prevent SQL injection by itself — it guarantees a string that WAS validated stays validated, which is a narrower (and more accurate) claim. Worth adding to complete the picture: new String(\"abc\").equals(\"abc\") is still true, and .intern() returns the pooled instance."
+      },
+      "followUp": "Why is (\"ab\" + \"c\") == \"abc\" true, while String a = \"ab\"; (a + \"c\") == \"abc\" is false? What does the compiler do with the first expression, and what actually happens at runtime in the second?",
+      "explanation": "<p>Strings are shared all over a JVM, so they must be immutable — and immutability is exactly what makes the <strong>string pool</strong> safe: the JVM keeps one shared copy of every string literal, and every use of <code>\"abc\"</code> anywhere in the program points at that same object.</p><pre><code>String a = \"abc\";              // pooled instance\nString b = \"abc\";              // SAME pooled instance\nString c = new String(\"abc\");  // forces a NEW heap object\n\na == b            // true  – both point at the pool\na == c            // false – different objects\na.equals(c)       // true  – same characters\nc.intern() == a   // true  – intern() returns the pooled twin</code></pre><p>Why immutability matters: <code>String</code> caches its <code>hashCode</code>, so a mutable string used as a <code>HashMap</code> key would change its hash and become unfindable; and a value validated once (a file path, an SQL fragment, a class name) can never be swapped out afterwards — that is the security argument.</p><p>Takeaway: never write <code>new String(\"literal\")</code>, and always compare strings with <code>equals()</code>, never <code>==</code>.</p>",
+      "hidden": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q7",
+      "question": "Explain checked vs unchecked exceptions: what was the design intent, why are checked exceptions controversial, and how does try-with-resources change how you close resources (including what happens to suppressed exceptions)?",
+      "answer": "Checked exceptions are those that enforce us to declare their handling. The intent was to enforce devs to handle expected problems like connection drop, file doesn't exist etc. But at the end of the day they were caught just to throw another error because what you gonna do when connection drops - it's an exception. \n\nTry with resources will invoke autocloseable when the block ends or there's exception - so you don't have to worry about it. Surpressed exception - if something happens during invoking caught / finally bloke of caught and this piece of code will throw another exception (eg. SQL throws exception during query but you get another exception because the connection was closed) then the less important one (the second one) wont suppress the first one (will be attached as suppressed exception) to allow user learn what was the the main (first) point of the exception. ",
+      "evaluation": {
+        "score": "7/10",
+        "verdict": "Good",
+        "feedback": "The design intent (force callers to deal with expected, recoverable failures like a missing file or dropped connection) and the core controversy (in practice they get caught only to be wrapped and rethrown, because the caller usually cannot do anything meaningful) are both right. Try-with-resources is essentially correct too: close() runs automatically when the block exits, normally or exceptionally, and when both the body and close() throw, the body's primary exception propagates while the close() exception is attached to it as a suppressed exception (retrievable via getSuppressed()) — which is exactly the opposite of the old finally idiom, where the close() exception would replace and hide the original. What is missing: the other half of the comparison — unchecked exceptions are RuntimeException and its subclasses, need no declaration, and signal programming bugs (NPE, IllegalArgumentException) rather than recoverable conditions; and the modern controversy points — checked exceptions do not compose with lambdas and streams (functional interfaces declare no throws), they leak implementation details into API signatures, and no later language (C#, Kotlin, Scala) adopted them. One more detail: multiple resources in one try(...) are closed in REVERSE order of creation."
+      },
+      "followUp": "In try-with-resources: if the body completes normally but close() throws, is that exception suppressed or does the caller see it? And why are two resources declared in one try closed in reverse order — give a concrete pair (e.g. wrapping streams) where the opposite order would break.",
+      "hidden": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q8",
+      "question": "What is type erasure in Java generics? Name two concrete things you cannot do because of it, and explain what the compiler actually emits in place of the type parameters.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null,
+      "assistRequired": true
+    },
+    {
+      "id": "q9",
+      "question": "Explain bounded wildcards: when do you declare a parameter as `List<? extends T>` vs `List<? super T>` (the PECS rule), and what operations does each variant forbid?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null,
+      "assistRequired": true
+    },
+    {
+      "id": "q10",
+      "question": "Since interfaces gained default methods, when is an abstract class still the right choice? And what happens when a class inherits two conflicting default methods?",
+      "answer": "abstract class is the right choice when we implement a base of something. There's a process that have different branches (implementation) but the main flow is the same. \n\nCompiler error (for the second question)",
+      "evaluation": {
+        "score": "6/10",
+        "verdict": "Partially correct",
+        "feedback": "Your first answer describes the template-method pattern (common flow, varying steps), which is indeed a legitimate abstract-class use case — but the decisive reason is more basic: interfaces cannot hold STATE. An abstract class can have instance fields, constructors, and protected/private members; default methods can only compute, never remember. So the moment your shared base needs a field, an abstract class is the only option. On the diamond conflict: 'compiler error' is the right instinct but incomplete — the compile error occurs only if the class does NOT override the conflicting method. The prescribed resolution is to override it yourself, and inside that override you may explicitly delegate to one parent using the special syntax `InterfaceA.super.method()` (plain `super.method()` won't work — it refers to the superclass, not an interface)."
+      },
+      "followUp": "Given that default methods can't have fields, how would you add a feature like 'every implementation gets a lazily-cached result of an expensive computation' — which the interface alone cannot express — and where does the cache live in your design?",
+      "hidden": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q11",
+      "question": "Describe the internals of `HashMap`: how a key finds its bucket, what happens on collision, when a bucket becomes a tree, when the map resizes — and why using a mutable object as a key is dangerous.",
+      "answer": "So we;ve got a key. This key is hashed, then we swap older bits (you can explain that) and after this bit manipultion we find a bucket. Then we add a value inside the bucket it becomes a tree when the size of hasmap exceed a part of its capacity. When the map resize items might change bucket and for sure might change they ordering. Mutable object is very dangerous because we calculate its hash then after bit manipulations we apply it to the bucket, once it's in the bucket lets say that we update the object - the hash will change and we may end up in a different bucket - the object won't be found.",
+      "evaluation": {
+        "score": "7/10",
+        "verdict": "Good",
+        "feedback": "Good coverage of the whole lifecycle. Correct: the key's hashCode is spread ('swap older bits' = h ^ (h >>> 16), mixing the high bits down so they influence the index), the bucket index is hash & (capacity-1), collisions chain in the bucket, resize rehashes and can move/reorder entries, and a mutated key lands in the wrong bucket and becomes unfindable. Two things to sharpen. Treeification has TWO thresholds, not one: a single bucket converts from a linked list to a red-black tree only when it holds >= 8 entries AND the table capacity is >= 64 (below 64 it resizes instead); it reverts to a list below 6. And resize is driven by the load factor: when size > capacity * 0.75 the table doubles. The tree matters because it turns worst-case collision lookup from O(n) into O(log n) — a defense against hash-collision DoS."
+      },
+      "followUp": "Why does HashMap spread the hash with h ^ (h >>> 16) instead of using hashCode() directly — what property of the bucket index (hash & (capacity-1)) makes the high bits otherwise useless?",
+      "hidden": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q12",
+      "question": "What is a fail-fast iterator and when does `ConcurrentModificationException` get thrown? Show two safe ways to remove elements from a collection while iterating over it.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null,
+      "assistRequired": true
+    },
+    {
+      "id": "q13",
+      "question": "In the Stream API, what does it mean that intermediate operations are lazy? Explain how a stream pipeline actually executes, and give a case where a parallel stream makes performance worse.",
+      "answer": "intermediation ops are lazy it means that they won't be triggered until the terminal operation is invoked. Terminal operations are othese like forEach, findFirst, toList etc. How stream pipeline actually executes - every element is transformed one by one with all stages that's why findFirst won't iterate over every item, it'll just find the first one that will reach till the end (might be filtered out by filter). Parallel stream split the source into chunks, and process them on the shared pool and merge the results. For small list it's an overkill, or when the merge is expensive or the list is already ordered. ",
+      "evaluation": {
+        "score": "8/10",
+        "verdict": "Good",
+        "feedback": "Strong answer. Correct: intermediate ops build a lazy recipe and nothing runs until a terminal op (forEach, findFirst, toList) fires; elements are pushed through all stages one at a time (not stage-by-stage), which is why short-circuiting ops like findFirst stop early instead of scanning everything. The parallel-stream mechanics (split into chunks, run on the shared ForkJoinPool, merge) are right too, as are 'small list' and 'expensive merge' as reasons it can be slower. One correction on 'already ordered': ordering by itself isn't the problem — the cost appears when an ordered stream uses order-sensitive ops (findFirst, limit, forEachOrdered) that force the pipeline to preserve encounter order, adding coordination. The other classic cost is a source with a poor spliterator (e.g. LinkedList) that can't split evenly."
+      },
+      "followUp": "For a parallel reduce to give the same result as the sequential one, what two properties must the accumulator/combiner satisfy — and can you give a reduction that is correct sequentially but wrong in parallel?",
+      "explanation": "<p>Intermediate operations (<code>filter</code>, <code>map</code>, <code>peek</code>…) do nothing when called — they just build a recipe. Only a terminal operation (<code>forEach</code>, <code>toList</code>, <code>findFirst</code>…) starts execution, and then elements flow through the whole pipeline <strong>one at a time</strong>, not stage by stage.</p><pre><code>Stream.of(\"a\", \"bb\", \"ccc\")\n    .filter(s -&gt; { System.out.println(\"filter \" + s); return s.length() &gt; 1; })\n    .map(s -&gt; { System.out.println(\"map \" + s); return s.toUpperCase(); })\n    .findFirst();\n// prints: filter a, filter bb, map bb — then stops.\n// \"ccc\" is never touched; nothing runs before findFirst() is called.</code></pre><p>Takeaway: each element is pulled through <em>all</em> stages before the next element starts, and short-circuiting terminals (<code>findFirst</code>, <code>anyMatch</code>, <code>limit</code>) stop pulling as soon as they have an answer — that is what laziness buys you.</p><p>Parallel streams split the source into chunks, process them on the shared ForkJoinPool and merge the results. That overhead makes them <em>slower</em> when the collection is small, the per-element work is trivial, the pipeline is ordered or stateful (<code>sorted</code>, <code>limit</code>), or the merge is expensive (e.g. collecting into a map).</p>",
+      "hidden": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q14",
+      "question": "What problem is `Optional` meant to solve, and what are its recognized anti-patterns (think: fields, method parameters, calling `get()`)? When is returning `null` still acceptable?",
+      "answer": "Optionals are used when we deal with empty values - it supposed to be null-safe, to avoid NPE. Antipatterns related to it are .get() != null, we shouldn't pass it as a function parameters. When is returning `null` still acceptable?\nIdk - json or serializable outputs? ",
+      "evaluation": {
+        "score": "6/10",
+        "verdict": "Partially correct",
+        "feedback": "Right on the purpose (make 'maybe absent' explicit in a return type so callers can't silently ignore it, unlike a bare null) and on two anti-patterns: passing Optional as a method parameter (forces callers to wrap, and you still must null-check the Optional itself), and calling get() without checking presence (throws NoSuchElementException — the NPE you were avoiding, reborn). You missed the big one: an Optional FIELD is an anti-pattern — it isn't Serializable, adds a wrapper object per instance, and trips up frameworks; model an absent field with a plain nullable field or an empty collection. On when null is still fine: not really JSON/serialization — rather internal/private code where absence is unambiguous and allocation matters, and especially collections, where you return an EMPTY collection instead of null or Optional. Also prefer orElse/orElseGet/map over get()."
+      },
+      "followUp": "orElse(expensiveDefault()) vs orElseGet(() -> expensiveDefault()): one of them evaluates the default even when the Optional is present. Which one, and why does that make orElseGet the safer default choice?",
+      "hidden": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q15",
+      "question": "What do records and sealed interfaces bring to Java, and how do they combine with pattern matching in `switch` to model data? What does the compiler check for you in a `switch` over a sealed hierarchy?",
+      "answer": "Records brings an easy immutability, they're object that doesn't require get methods - they're fields are implicitly private final, and we can reach out to these fields directly. Sealed interfaces describe what classes will implement this interface, make a boundary, makes a limit. With pattern matching in 'switch' we can know how many options will be there - i mean with sealed interface we've got like 4 implementing classes - thus we can define all possible options in switch cause switch requiers to fill all possible options, without sealed classes we didn't know how many implementation are there.",
+      "evaluation": {
+        "score": "8/10",
+        "verdict": "Good",
+        "feedback": "Solid grasp of all three pieces. Records: correct that components are private final and give immutability for free — plus the compiler generates the canonical constructor, equals(), hashCode() and toString(). One precision: you don't access the fields 'directly' from outside; the record generates public accessor methods named after the component (name(), not getName()). Sealed interfaces: right — 'permits' fixes the finite set of implementers. Your switch point is the best part: because the hierarchy is closed, an exhaustive switch over all permitted subtypes needs NO default branch, and the compiler VERIFIES exhaustiveness — if someone later adds a permitted subtype, every switch that didn't handle it fails to compile. Combined with record deconstruction patterns (case Circle(double r) -> ...) this is how Java models algebraic / data-oriented types."
+      },
+      "followUp": "If you DO add a default branch to that exhaustive switch, you lose the compiler's exhaustiveness check when a new subtype is added later. So when is adding default still the right call, and what trade-off are you accepting?",
+      "hidden": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q16",
+      "question": "What is the happens-before relation in the Java Memory Model, and what is 'unsafe publication' of an object? Explain why the classic double-checked locking idiom is broken without `volatile`.",
+      "answer": "explain pls.",
+      "evaluation": null,
+      "followUp": null,
+      "explanation": "<p><strong>happens-before</strong> is the JMM's ordering guarantee: if action A happens-before B, then A's memory effects are visible to B. It is established by, among others, unlocking a monitor before another thread locks it, and writing a <code>volatile</code> field before another thread reads it.</p><p><strong>Unsafe publication</strong> is making an object visible to other threads without such an edge, so they may see a half-constructed object — its fields still at default values.</p><pre><code>class Holder { int x = 42; }\nHolder h;                 // plain (non-volatile) field\n\n// Thread A: 1) allocate  2) write x=42  3) publish h\nh = new Holder();\n// Thread B:\nif (h != null) use(h.x);  // may see h != null but x == 0 !</code></pre><p>The compiler/CPU may reorder steps 2 and 3, so B sees the reference before the constructor's writes. <strong>Double-checked locking</strong> breaks the same way: without <code>volatile</code> a second thread can read a non-null but not-yet-initialized instance. <code>volatile</code> adds the happens-before edge that forbids that reordering.</p><pre><code>private static volatile Singleton inst;   // volatile is mandatory\nstatic Singleton get() {\n    if (inst == null) {\n        synchronized (Singleton.class) {\n            if (inst == null) inst = new Singleton();\n        }\n    }\n    return inst;\n}</code></pre>",
+      "assistRequired": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q17",
+      "question": "Compare `synchronized`, `ReentrantLock`, and atomic classes (`AtomicInteger` etc.): what does each give you, and how would you choose between them for a shared counter vs a multi-step critical section?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q18",
+      "question": "How does `ConcurrentHashMap` provide thread safety without locking the whole map? Why is a get-then-put sequence still a race condition on it, and which methods solve that atomically?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q19",
+      "question": "Compare `CompletableFuture` composition with virtual threads (Project Loom): how does each deal with blocking I/O, and how do virtual threads change the argument for writing async, callback-style code?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q20",
+      "question": "Java has a garbage collector, yet production services still leak memory. Name typical leak sources (e.g. static collections, listeners, `ThreadLocal` in thread pools, caches) and describe how you would confirm and locate a leak in a running JVM.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}

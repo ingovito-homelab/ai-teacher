@@ -1,0 +1,33 @@
+# VCS
+.git
+.gitignore
+
+# Dependencies (reinstalled in image)
+node_modules
+
+# Build output (rebuilt in image)
+dist
+
+# Runtime data (mounted as volume)
+data
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.*
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Docs
+README.md

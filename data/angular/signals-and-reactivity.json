@@ -1,0 +1,63 @@
+{
+  "id": "signals-and-reactivity",
+  "title": "Signals & Reactivity",
+  "description": "Angular's signal-based reactivity: signal, computed, effect, signal inputs/outputs, linkedSignal, resource and RxJS interop.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is a signal in Angular, and how do you create, read and update one (`signal`, calling it as a function, `set`, `update`)? What problem do signals solve that plain class fields did not?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q2",
+      "question": "How does `computed()` work? Explain how it tracks its dependencies, when it recalculates, and why it is both lazy and memoized.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q3",
+      "question": "What is `effect()` for, and why does the Angular team advise using it sparingly? Give one legitimate use case and one case where `computed()` or template binding is the better tool.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q4",
+      "question": "Explain signal-based component APIs: `input()`, `input.required()`, `output()` and `model()`. What does `model()` give you that a plain `input()` does not, and how does it enable two-way binding on your own component?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q5",
+      "question": "What problem does `linkedSignal()` solve? Describe a concrete scenario — e.g. a selected item that must reset when the list it belongs to changes — and explain how it differs from `computed()`.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q6",
+      "question": "Describe the `resource()` / `httpResource()` APIs for loading async data with signals. How do they track a reactive request, what states do they expose (value, status, error), and what happens when the request signal changes mid-flight?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q7",
+      "question": "How do signals and RxJS interoperate? Explain `toSignal()` and `toObservable()`, including what initial value problem `toSignal()` has to deal with and where subscription/cleanup happens.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q8",
+      "question": "After the introduction of signals, when is RxJS still the right choice in an Angular app? Contrast the strengths of each model — think event streams, debouncing, cancellation, combining async sources vs. synchronous derived state.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}

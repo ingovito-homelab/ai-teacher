@@ -1,0 +1,49 @@
+{
+  "id": "apis-and-communication",
+  "title": "APIs & Communication",
+  "description": "Designing service interfaces: protocols, contracts, real-time delivery and gateways.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Compare REST and gRPC as communication styles between services. What properties of each would push you toward one or the other?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q2",
+      "question": "What makes an API change backward-compatible vs breaking, and what strategies exist for evolving an API that external clients already depend on?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q3",
+      "question": "Offset-based pagination (page=5&size=20) misbehaves on large, frequently-changing datasets. Why, and how does cursor (keyset) pagination fix it?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q4",
+      "question": "A client needs live updates from the server (e.g. a chat or a dashboard). Compare polling, long polling, server-sent events and WebSockets — when is each good enough?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q5",
+      "question": "What responsibilities does an API gateway typically take on, and what are the risks of letting it accumulate too much logic?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q6",
+      "question": "A user double-clicks 'Pay' and the client also retries on timeout. How do you design the payment endpoint so the customer is never charged twice? Explain idempotency keys end to end.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}

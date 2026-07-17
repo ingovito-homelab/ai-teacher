@@ -1,0 +1,71 @@
+{
+  "id": "fundamentals",
+  "title": "Fundamentals",
+  "description": "Scalability, reliability and trade-offs.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "When would you choose a message queue over direct synchronous calls between services?",
+      "answer": "Use a queue to decouple producers/consumers and absorb bursts.\n",
+      "evaluation": {
+        "score": "6/10",
+        "verdict": "Partially correct",
+        "feedback": "Both points are correct — decoupling and load leveling (absorbing bursts) are the two classic reasons. But the answer is thin for a design question. Also worth naming: durability and retries (the message survives a consumer crash, unlike a failed HTTP call), tolerance to consumer downtime, and fan-out to multiple consumers. And the flip side: queues are the wrong choice when the caller needs the result immediately (request/response), and they cost you latency, eventual consistency, ordering/duplicate-delivery concerns, and an extra piece of infrastructure to operate."
+      },
+      "followUp": "Most queues guarantee at-least-once delivery, meaning the same message can arrive twice. What property does that force onto your consumer, and how would you implement it for a 'charge the customer' message?",
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q2",
+      "question": "Explain the trade-offs described by the CAP theorem.",
+      "answer": "Consistency, Availability, partitioning, you can't have all of them. \n\nIf you choose data consistency and availability you can't do partioning of the db. 1 db - it's consistent, it's available but you trade off oportunity to increase the throughput. \n\nIf you choose availability and partitioning it means you have a lot of nodes, if the communication between them fail -> You allow the system to working further but you give up consistency, when the connection is restored you may have the inconsistent state between 2 nodes that will require intervention. \n\nif you choose partitioning and data consistency - multiple nodes but you want to maintain your state consistent the app might not be available if there's problem to communicate between nodes - they would require to communicate between each other to check if they can perform some action, if they can't - they will halt the process.\n\n----FOLLOW UP ANSWER-----\nSocial media - when we value more fast response than consistency. One replica might be updated, but the other one doesnt - which is fine. ",
+      "evaluation": {
+        "score": "7/10",
+        "verdict": "Good",
+        "feedback": "Main answer: the AP and CP scenarios are explained well — nodes keep serving and diverge (AP), or halt to stay consistent (CP), including the reconciliation problem after the split heals. Two corrections though. First, P stands for partition *tolerance* — the system's ability to keep operating when the network between nodes breaks — not for sharding the database; giving up P does not mean giving up throughput/scaling, it means assuming the network never fails. Second, in any real distributed system partitions *will* happen, so P is not optional — 'CA' effectively means a single-node system. Follow-up answer: correct example and correctly reasoned — social feeds serve reads from replicas that may lag, because a stale like-count or post order is harmless and response time matters more. To make it a strong answer, name the mechanism (asynchronous replication + reading from any replica = eventual consistency) and a concrete system that makes this trade, e.g. Cassandra or DynamoDB with relaxed read consistency, or DNS."
+      },
+      "followUp": "In your social-media example, a user posts a comment and immediately refreshes the page — with async replication they may not see their own comment yet. Which consistency guarantee fixes exactly this annoyance without making the whole system strongly consistent, and how could you implement it (hint: think about where that user's next read is allowed to go)?",
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q3",
+      "question": "What is the difference between horizontal and vertical scaling, and what forces most systems toward horizontal scaling eventually?",
+      "answer": "Horizontal  - more nodes, more separate machines. Vertical - more CPUs, more RAM on the same machine. \n\nHorizontal scaling is almost unlimited, cheaper in the long term. Vertical is quick (we can add more RAM) - but is quite limited (there's limit about adding CPUs and RAM) - and it's more expensive after some treshhol.",
+      "evaluation": {
+        "score": "7/10",
+        "verdict": "Good",
+        "feedback": "Definitions are correct, and you named the two key economic facts: vertical is the quick fix but hits a hardware ceiling and gets disproportionately expensive near the top, while horizontal is near-unlimited. Two things missing. First, the strongest force toward horizontal is not capacity but availability: one big machine is a single point of failure, and redundancy/zero-downtime deploys require multiple nodes by definition. Second, horizontal is not free — it only works if the application is built for it (stateless instances, load balancing, distributed or shared data), which is a real engineering cost, not just a hardware bill."
+      },
+      "followUp": "Horizontal scaling requires your application to change, not just your infrastructure. What specifically must an app instance stop doing (or stop keeping) before you can safely run ten copies of it?",
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q4",
+      "question": "What problem does a load balancer solve, and what changes about your application design when instances sit behind one (think: sessions, local state, health checks)?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q5",
+      "question": "Where would you add caching in a typical web system, and what are the main strategies for keeping a cache and its underlying database from drifting apart?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q6",
+      "question": "Explain database sharding: how do you pick a shard key, and what operations become hard or impossible once data is sharded?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q7",
+      "question": "Design for failure: a downstream service your system depends on starts timing out under load. What patterns (e.g. timeouts, retries, circuit breakers, backpressure) would you combine to keep your system healthy, and what can naive retries make worse?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}

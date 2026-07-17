@@ -1,0 +1,147 @@
+{
+  "id": "parallelism",
+  "title": "Parallelism",
+  "description": "Concurrency and parallelism in Java — threads, memory model, executors, synchronization and modern concurrency APIs.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the difference between concurrency and parallelism, and why can a single-core machine be concurrent but not parallel?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q2",
+      "question": "Explain the difference between a process and a thread in the JVM. What state is shared between threads of the same process and what is private to each thread?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q3",
+      "question": "What are the ways to create and start a thread in Java, and why is implementing Runnable usually preferred over extending Thread?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q4",
+      "question": "Walk through the states in the Thread lifecycle (NEW, RUNNABLE, BLOCKED, WAITING, TIMED_WAITING, TERMINATED) and what transitions between them.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q5",
+      "question": "What is a race condition? Give a concrete example with a shared counter and explain exactly where the interleaving goes wrong.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q6",
+      "question": "What does the `synchronized` keyword guarantee, and what is the difference between a synchronized method and a synchronized block? What object is used as the monitor in each case?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q7",
+      "question": "What does the `volatile` keyword do? What guarantees does it provide and, importantly, what does it NOT provide (e.g. atomicity of compound operations)?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q8",
+      "question": "Explain the Java Memory Model's happens-before relationship. Give two concrete sources of happens-before edges and explain why they matter for visibility.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q9",
+      "question": "What is the difference between the `wait()`/`notify()`/`notifyAll()` mechanism and using explicit Lock/Condition objects? Why must wait() always be called inside a loop that rechecks the condition?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q10",
+      "question": "What is a deadlock? Describe the four Coffman conditions required for it, and explain one practical strategy to prevent deadlocks in code that acquires multiple locks.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q11",
+      "question": "Compare livelock and starvation with deadlock. How does each manifest and how can thread priorities or fairness policies affect starvation?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q12",
+      "question": "What problem do the classes in `java.util.concurrent.atomic` (e.g. AtomicInteger) solve, and how does compare-and-swap (CAS) let them be lock-free? What is the ABA problem?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q13",
+      "question": "Why should you generally use an ExecutorService instead of creating threads manually? Contrast the behavior of a fixed thread pool, a cached thread pool, and a single-thread executor.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q14",
+      "question": "Explain the internal parameters of ThreadPoolExecutor (core pool size, max pool size, keep-alive, work queue, rejection policy) and how a submitted task flows through them.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q15",
+      "question": "What is the difference between Runnable, Callable, Future, and CompletableFuture? What does CompletableFuture add over a plain Future?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q16",
+      "question": "How does the Fork/Join framework work, and what is work-stealing? When is a ForkJoinPool a better fit than a standard thread pool?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q17",
+      "question": "When does a parallel stream (`.parallelStream()`) actually improve performance, and what are the common pitfalls (shared mutable state, cheap per-element work, ordering, the common ForkJoinPool)?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q18",
+      "question": "Compare the concurrency primitives CountDownLatch, CyclicBarrier, Semaphore, and Phaser. Give a use case where each is the natural choice.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q19",
+      "question": "How does ConcurrentHashMap achieve thread safety without locking the whole map, and how does its approach differ from a Collections.synchronizedMap wrapper? What are the semantics of its size() and iterators?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q20",
+      "question": "What are virtual threads (Project Loom, Java 21) and how do they differ from platform threads? Explain carrier threads, thread pinning, and why virtual threads change the cost model for blocking I/O.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}

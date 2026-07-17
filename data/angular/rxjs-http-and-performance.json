@@ -1,0 +1,49 @@
+{
+  "id": "rxjs-http-and-performance",
+  "title": "RxJS, HTTP & Performance",
+  "description": "Observables in practice, HttpClient and interceptors, subscription hygiene, and change-detection performance.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is an Observable, and how does it differ from a Promise? Cover laziness, multiple emissions, and cancellation via unsubscribe.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q2",
+      "question": "Explain the difference between `switchMap`, `mergeMap`, `concatMap` and `exhaustMap`. For a type-ahead search box firing an HTTP request per keystroke, which one do you pick and why?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q3",
+      "question": "What are HTTP interceptors in Angular and what are they typically used for? Sketch how a functional interceptor (`HttpInterceptorFn`) adds an auth token and handles a 401 response.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q4",
+      "question": "When do you have to unsubscribe from an Observable in Angular, and when is it unnecessary? Compare the `async` pipe, `takeUntilDestroyed()`, and manual unsubscribe in `ngOnDestroy` — which leaks are you preventing?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q5",
+      "question": "What does `ChangeDetectionStrategy.OnPush` change about when a component is re-checked? List the things that mark an OnPush component dirty, and explain why signals make OnPush components 'just work'.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q6",
+      "question": "Your Angular app's list page is slow: typing in a filter box janks and scrolling stutters. Walk through how you would diagnose and fix it — think `track` in `@for`, OnPush/signals, moving work out of templates, `@defer`, and virtual scrolling.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}

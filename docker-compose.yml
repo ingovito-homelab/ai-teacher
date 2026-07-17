@@ -1,0 +1,8 @@
+services:
+  ai-teacher:
+    build: .
+    ports:
+      - "8088:3000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

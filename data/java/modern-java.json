@@ -1,0 +1,77 @@
+{
+  "id": "modern-java",
+  "title": "Modern Java (17–25)",
+  "description": "Language and library features from recent Java releases: records, pattern matching, virtual threads, structured concurrency and friends.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What does `var` do in Java, and what are its limits — where can it be used and where not? When does `var` improve readability and when does it hurt it?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q2",
+      "question": "How do switch expressions differ from the old switch statement? Explain arrow labels, `yield`, exhaustiveness, and why the absence of fall-through matters.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q3",
+      "question": "Records generate a lot for you — what exactly? Explain the canonical constructor vs a compact constructor, and show how you enforce an invariant (e.g. a non-negative amount) in a record.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q4",
+      "question": "Explain pattern matching for `instanceof` and record deconstruction patterns in `switch`. How do nested patterns and guards (`when` clauses) let you replace an if-else chain over a data hierarchy?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q5",
+      "question": "When would you model a domain with sealed interfaces + records instead of an enum or an open class hierarchy? What guarantees does `sealed` give the compiler and readers of the code?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q6",
+      "question": "How are virtual threads implemented — what is a carrier thread, and what happens when a virtual thread blocks on I/O? Explain 'pinning': what causes it and why it undermines the benefit of virtual threads.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q7",
+      "question": "What problem does structured concurrency (`StructuredTaskScope`) solve compared to submitting tasks to an `ExecutorService`? Explain how it handles cancellation and failure of sibling subtasks.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q8",
+      "question": "Why is `ThreadLocal` a poor fit for virtual threads, and how do scoped values (`ScopedValue`) address this? Compare their lifecycle and mutability models.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q9",
+      "question": "What did sequenced collections (`SequencedCollection`, `SequencedMap`) add in Java 21? What inconsistency in the collections framework do they fix — give examples with `List`, `Deque` and `LinkedHashMap`.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q10",
+      "question": "What are Stream gatherers (`Stream.gather`)? What kinds of intermediate operations were impossible or awkward with the classic Stream API — e.g. windowing — and how does a `Gatherer` express them?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}

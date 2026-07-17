@@ -1,0 +1,61 @@
+{
+  "id": "data-and-storage",
+  "title": "Data & Storage",
+  "description": "Choosing databases, indexing, replication and consistency of stored data.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What does a database index actually do under the hood, and why don't we simply index every column?",
+      "answer": "Indexes create a structure with sorted map (hashmap) that map particular key to the element. matching can be partially so if we have an index of (name, date) and we use name - it will work, but date won't be working. We should use indexes wisely because of the two things: 1. They generates additional data (they're heavy) + they add burden when we add data to the database. For every record, update we need to proceed with the process of creating such an index with the reference to data.",
+      "evaluation": {
+        "score": "6/10",
+        "verdict": "Partially correct",
+        "feedback": "The write-cost and storage-cost trade-off is right, and the leftmost-prefix point (index on (name, date) helps a query on name but not on date alone) is exactly correct. But you conflate two different structures: a hashmap is NOT sorted. The default index in most databases is a B-tree (B+tree), which keeps keys sorted so it supports range scans (>, <, BETWEEN, ORDER BY) and prefix matching. A hash index maps a key to a location but only supports equality (=), not ranges or ordering. That distinction is the whole 'under the hood' point. Also worth naming: the index stores a copy of the indexed column(s) plus a pointer to the row, and the reason we don't index every column is that every INSERT/UPDATE/DELETE must update every index too, so writes get slower and storage grows for indexes that may never be used by a query."
+      },
+      "followUp": "You said a hash index only handles equality while a B-tree handles ranges. So why is the B-tree still the DEFAULT choice even for columns you only ever look up with '='? What does the tree buy you that a hash index can't, beyond range queries?",
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q2",
+      "question": "When would you pick a relational database over a document store like MongoDB, and when the other way around? Give the deciding factors, not just examples.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q3",
+      "question": "Explain leader-follower (primary-replica) replication: what problems does it solve, and what new problem does replication lag introduce for the application?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q4",
+      "question": "What is a transaction isolation level? Describe one anomaly (e.g. dirty read, non-repeatable read, phantom) and which level prevents it.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q5",
+      "question": "Your table has 500 million rows and analytical queries are killing the production database. What architectural options do you have, and what are their trade-offs?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q6",
+      "question": "What is optimistic vs pessimistic locking, and how would you choose between them for a seat-reservation system?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q7",
+      "question": "Explain event sourcing: what does it mean to store events instead of current state, what does it buy you, and what makes it expensive to live with?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "id": "jvm-and-performance",
+  "title": "JVM & Performance",
+  "description": "Class loading, JIT compilation, GC selection, memory areas, and diagnosing performance problems in a running JVM.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Describe the JVM class loading process: loading, linking (verification, preparation, resolution) and initialization. What is the class loader delegation model and what problem does it prevent?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q2",
+      "question": "Java is 'compiled to bytecode, then JIT-compiled'. Explain tiered compilation: what do the interpreter, C1 and C2 each contribute, and what is deoptimization — when does the JVM throw compiled code away?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q3",
+      "question": "Map out the JVM's memory areas: heap, thread stacks, metaspace, code cache, and direct (off-heap) memory. For each, name one error or symptom you see when it is exhausted.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q4",
+      "question": "What is escape analysis and what optimizations does it enable (scalar replacement, lock elision)? Why can allocating short-lived objects in a hot loop still be effectively free?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q5",
+      "question": "Compare the modern garbage collectors: G1, ZGC and Shenandoah. What does each optimize for, and how would you choose one for (a) a latency-sensitive API with a 100 GB heap and (b) a small batch job?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q6",
+      "question": "A service's p99 latency spikes every few minutes while p50 stays flat. Walk through how you would confirm or rule out GC as the cause — which logs/flags and which metrics (pause time vs allocation rate) would you look at?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q7",
+      "question": "Which JDK tools would you use on a live, misbehaving JVM and for what: `jcmd`, `jstack`, `jmap`, `jstat`? Describe how you would diagnose a suspected deadlock and a suspected memory leak with them.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q8",
+      "question": "What is Java Flight Recorder (JFR), and why is it safe to run in production? What kinds of events does it capture, and how does it compare to a sampling profiler like async-profiler with flame graphs?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q9",
+      "question": "Why do JVM applications start slow, and what do CDS/AppCDS, AOT caching (Project Leyden) and GraalVM native image each do about it? What do you trade away with a native image?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q10",
+      "question": "Why are naive Java microbenchmarks (a loop around `System.nanoTime()`) almost always wrong? Explain the pitfalls — warmup, dead-code elimination, on-stack replacement — and how JMH is designed to avoid them.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}

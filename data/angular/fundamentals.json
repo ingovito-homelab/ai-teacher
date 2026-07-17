@@ -1,0 +1,77 @@
+{
+  "id": "fundamentals",
+  "title": "Angular Fundamentals",
+  "description": "Components, dependency injection, lifecycle, directives, pipes and routing.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is a component in Angular, and what are the roles of the three main parts of its definition: the template, the class, and the metadata in the `@Component` decorator?",
+      "answer": "Component is a piece of code in angular when we defined the piece of \"component\" - the template is an html based template which defines how the component will look like. \nThe class will contain the whole logic, with constructor, fields, methods. Metadata defines the configuration for the component, how it will be refresh, standalone etc.",
+      "evaluation": {
+        "score": "7/10",
+        "verdict": "Good",
+        "feedback": "The three roles are right: the template is the HTML that declares what renders (and where data/event bindings hook in), the class holds the state and logic (fields, constructor, methods, lifecycle hooks), and @Component metadata configures the component. What's thin is the metadata part — 'how it will be refresh, standalone etc.' skips the single most important field: the `selector`, the tag name (e.g. `app-user`) by which OTHER templates place this component. Other key metadata: `template`/`templateUrl` and `styles`/`styleUrls` (which template and CSS to use), `standalone` + `imports` (the modern module-free style, where the component declares its own dependencies), and `changeDetection` (Default vs OnPush) — that's the 'refresh' you gestured at. Worth being precise: the class isn't just 'logic', it IS the component instance — its public fields/methods are exactly what the template can bind to."
+      },
+      "followUp": "The metadata has a `selector`. Besides a tag name like `app-user`, what other forms can a selector take (attribute, class), and what does `changeDetection: OnPush` change about WHEN Angular re-checks this component's template?",
+      "hidden": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q2",
+      "question": "Explain the difference between property binding `[value]=\"x\"`, event binding `(click)=\"f()\"`, and two-way binding `[(ngModel)]=\"x\"`. What is two-way binding actually syntactic sugar for?",
+      "answer": "[value]=\"x\" save value of x to the child component\n(click)=\"f()\" will trigger function f when click event is triggered. \nTwo way binding [(ngModel] will bind it two way - first it will set the value from the parent component (that declare eg. <input [(ngModel)]=\"x\">, second it will enable saving to the x from that component. So the child component has the possibility to mutate the x because it's a two way binding. So instead of [NgModel] and input binding and handlin ngModelChange=(event) => x = event.value) we'll have a combination of both.",
+      "evaluation": null,
+      "followUp": null,
+      "answeredAt": "2026-07-17T23:56:16.104Z"
+    },
+    {
+      "id": "q3",
+      "question": "How do parent and child components communicate in Angular? Compare `input()`/`output()` (or the decorator equivalents `@Input`/`@Output`) and explain when you would reach for a shared service instead.",
+      "answer": "so we can communicate via fields (@Input that we pass from the parent to the child) and via output if we want to emit some event from the child to the parent. Usually if they're tightly coupled and it's just one level - I'd go with fields and passing values, if there're multiple level like parent A -> parent B - > parent C -> child D to pass a field from A to D then it's better to use a shared service instead or store and keep the data there.",
+      "evaluation": {
+        "score": "8/10",
+        "verdict": "Good",
+        "feedback": "Correct and well-reasoned. `@Input()` passes data down parent → child, `@Output()` (an `EventEmitter` you `.emit()` on) sends events up child → parent, and the 'prop drilling' problem — threading a value through A → B → C → D just so D can use it — is exactly the right trigger to reach for a shared service instead. Two things to add. First, `@Output` isn't only for 'events' loosely — the child emits, the parent binds with `(childEvent)=\"handler($event)\"`; the child never calls the parent directly. Second, depth isn't the only reason for a service: use one whenever the components are NOT in a parent-child line at all (siblings, or a route away), or when the state should outlive a single component. And with `input()`/`output()` (the signal-based functions) inputs are signals you read as `count()`, which integrates with reactivity better than the decorator fields."
+      },
+      "followUp": "When two components share data through a service, how does one component get NOTIFIED that the other changed the value — what does the service expose (a plain field won't do it), and how does a signal or an RxJS Subject solve that?",
+      "hidden": true,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q4",
+      "question": "How does Angular's dependency injection work? Explain what an injector is, what `providedIn: 'root'` means, and what changes when you instead list a service in a component's `providers` array.",
+      "answer": "Help",
+      "evaluation": null,
+      "followUp": null,
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q5",
+      "question": "Compare constructor injection with the `inject()` function. Why has `inject()` become the recommended style, and in which contexts can `inject()` be called at all (what is an 'injection context')?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q6",
+      "question": "Walk through the component lifecycle: what are `ngOnInit`, `ngOnChanges`, `ngAfterViewInit` and `ngOnDestroy` for, and why is initialization logic usually put in `ngOnInit` rather than the constructor?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q7",
+      "question": "What is the difference between a structural directive and an attribute directive? Give an example of each and explain what the `*` prefix (e.g. in `*ngIf`) tells the compiler to do.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q8",
+      "question": "Explain how the Angular Router matches a URL to a component. Cover route configuration, route parameters (`/users/:id`), and lazy loading a route with `loadComponent`/`loadChildren` — why does lazy loading matter for startup time?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}

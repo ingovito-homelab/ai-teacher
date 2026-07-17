@@ -1,0 +1,31 @@
+{
+  "id": "basics",
+  "title": "Basics",
+  "description": "Core language concepts every developer should know.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the difference between `let`, `const`, and `var`?",
+      "answer": "let and const are block scoped, var is function scoped. const cannot be reassigned.",
+      "evaluation": {
+        "score": "8/10",
+        "verdict": "Good",
+        "feedback": "Correct on scoping and reassignment. Missing: `var` is hoisted and initialized as undefined, while `let`/`const` are hoisted but stay in the temporal dead zone until declared."
+      },
+      "followUp": "What is the temporal dead zone, and why does accessing a `let` variable before its declaration throw?",
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    },
+    {
+      "id": "q2",
+      "question": "Explain how the event loop handles a `setTimeout(fn, 0)` call.",
+      "answer": "It is queued as a macrotask and runs after the current stack + microtasks.",
+      "evaluation": {
+        "score": "7/10",
+        "verdict": "Good",
+        "feedback": "The core mechanism is right: the callback goes into the macrotask (timer) queue and only runs once the current call stack is empty and the entire microtask queue has been drained. What's missing: the timer API hands the callback to the host environment first (it is not executed 'inline'), 0 ms is a minimum delay, not a guarantee (browsers clamp nested timers to ~4 ms and delay timers in background tabs), and only one macrotask is processed per event-loop turn, with microtasks drained fully in between."
+      },
+      "followUp": "If a microtask keeps scheduling another microtask in an infinite chain, will the `setTimeout(fn, 0)` callback ever run? What does that tell you about the risk of doing heavy work in promise chains?",
+      "answeredAt": "2026-07-17T12:00:00.000Z"
+    }
+  ]
+}

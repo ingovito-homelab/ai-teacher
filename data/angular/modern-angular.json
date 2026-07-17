@@ -1,0 +1,63 @@
+{
+  "id": "modern-angular",
+  "title": "Modern Angular (v17–v21)",
+  "description": "The new-generation Angular: standalone components, built-in control flow, @defer, zoneless change detection, SSR & hydration, signal forms.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What are standalone components, and why did Angular move away from NgModules as the default? What used to live in an NgModule, and where does that responsibility go in a standalone app?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q2",
+      "question": "Describe the built-in control flow syntax: `@if`, `@for` and `@switch`. What advantages does it have over `*ngIf`/`*ngFor`, and why does `@for` require a `track` expression?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q3",
+      "question": "What does a `@defer` block do? Explain the triggers (`on viewport`, `on interaction`, `when ...`), the `@placeholder`/`@loading`/`@error` sub-blocks, and what actually happens to the deferred code at build time.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q4",
+      "question": "How does classic zone.js-based change detection work — what does zone.js patch, and when does Angular decide to re-check components? What are the downsides that motivated moving away from it?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q5",
+      "question": "What is zoneless change detection (`provideZonelessChangeDetection`)? How does Angular know when to update the view without zone.js, and what does your code have to do differently for the UI to stay in sync?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q6",
+      "question": "Explain server-side rendering and hydration in Angular. What problem does hydration solve compared to destroy-and-re-render, and what do event replay and incremental hydration (`hydrate on ...` triggers on @defer blocks) add on top?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q7",
+      "question": "What are Signal Forms (the experimental signal-based forms API), and what pain points of Reactive Forms are they trying to fix — think typing, deriving validity as state, and synchronizing the model with the view?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q8",
+      "question": "How has Angular's toolchain modernized in recent versions? Cover the esbuild/Vite-based `application` builder replacing webpack, and the move of unit testing away from Karma (Vitest/Web Test Runner). What do these changes buy day-to-day?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}
