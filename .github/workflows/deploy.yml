@@ -20,6 +20,7 @@ jobs:
           {
             "name":       "app",
             "image":      "wdrozdzowski/ai-teacher",
+            "paths":      ["**"],
             "context":    ".",
             "dockerfile": "./Dockerfile"
           }
