@@ -1,0 +1,8 @@
+services:
+  app:
+    image: ${APP_IMAGE}
+    ports:
+      - "${APP_PORT:-8088}:3000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

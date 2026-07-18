@@ -1,0 +1,38 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    uses: ingovito-homelab/workflows-template/.github/workflows/docker-compose-deploy.yml@v1
+    with:
+      registry: docker.io
+      app_dir: docker-apps/ai-teacher/app # relative => ~/docker-apps/...
+
+      services: |
+        [
+          {
+            "name":       "app",
+            "image":      "wdrozdzowski/ai-teacher",
+            "context":    ".",
+            "dockerfile": "./Dockerfile"
+          }
+        ]
+
+      deploy_files: |
+        compose.yaml
+
+      compose_down: true
+      prune_images: false
+
+      # APP_IMAGE is prepended automatically.
+      env_vars: |
+        APP_PORT=8088
+
+    secrets: inherit
