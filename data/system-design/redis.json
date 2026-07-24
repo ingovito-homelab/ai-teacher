@@ -1,0 +1,42 @@
+{
+  "id": "redis",
+  "title": "Redis",
+  "description": "Redis: data structures, caching patterns, persistence, expiration and high availability.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is Redis and why is it so fast? Name its core data structures (string, hash, list, set, sorted set) and give a practical use case for each.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q2",
+      "question": "Describe common caching patterns with Redis: cache-aside, read-through and write-through/write-behind. Which one is most common in practice and what consistency problems does it have?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q3",
+      "question": "How does key expiration and eviction work in Redis? Explain TTL, the difference between eviction policies like noeviction, allkeys-lru and volatile-lru, and when you would choose each.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q4",
+      "question": "Compare Redis persistence options: RDB snapshots vs AOF. What are the trade-offs in durability, recovery time and performance, and can you combine them?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q5",
+      "question": "How do you scale Redis for high availability? Compare replication with Sentinel against Redis Cluster, and explain what problems distributed locks (e.g. SETNX / Redlock) try to solve and why they are tricky.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}

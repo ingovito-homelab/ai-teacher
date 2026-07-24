@@ -1,0 +1,22 @@
+{
+  "id": "postgresql",
+  "title": "PostgreSQL",
+  "description": "Indexes, MVCC, locking, transactions and operational PostgreSQL knowledge",
+  "questions": [
+    "How is a B-tree index in PostgreSQL structured, and what kinds of predicates can it serve (equality, ranges, prefix LIKE, ORDER BY)? For a multi-column index on (a, b, c), which queries can use it and which cannot — and why does column order matter?",
+    "List common reasons the PostgreSQL planner ignores an existing index: functions on the indexed column, type mismatches, low selectivity, leading wildcards, stale statistics. For each, show how you would rewrite the query or fix the schema so the index is used.",
+    "How do you read the output of `EXPLAIN (ANALYZE, BUFFERS)`? Explain Seq Scan vs Index Scan vs Index Only Scan vs Bitmap Scan, what 'rows expected vs rows actual' mismatch tells you, and how the planner's cost estimate is built.",
+    "Beyond plain B-tree: what are partial indexes, expression indexes and covering indexes (INCLUDE)? Give a concrete use case for each, and explain when a GIN index is the right choice (JSONB, arrays, full-text search).",
+    "Explain MVCC in PostgreSQL: what happens physically when a row is UPDATEd or DELETEd, what are xmin/xmax and dead tuples, and why does PostgreSQL never update rows in place? What does this design buy readers?",
+    "What do VACUUM and autovacuum actually do, and what goes wrong when they can't keep up (table bloat, transaction ID wraparound)? Why can a long-running transaction on an unrelated table still cause bloat everywhere?",
+    "Walk through the transaction isolation levels as PostgreSQL implements them: READ COMMITTED, REPEATABLE READ, SERIALIZABLE. Which anomalies does each prevent, why is READ UNCOMMITTED effectively absent, and what is a serialization failure (40001) — how must application code respond to it?",
+    "Explain row-level locking with `SELECT ... FOR UPDATE`: what does it block, how does `FOR UPDATE SKIP LOCKED` enable a job-queue pattern, and when would you use `FOR NO KEY UPDATE` or `FOR SHARE` instead?",
+    "How does PostgreSQL detect deadlocks and what does it do about them? Show a classic two-transaction deadlock on two rows, and describe coding practices (consistent ordering, short transactions, lock timeouts) that prevent them.",
+    "Two concurrent transactions both check 'does an account with this email exist?' and then insert. Why does the check-then-insert pattern fail even at SERIALIZABLE-less levels, and what are the correct tools: unique constraints, `INSERT ... ON CONFLICT`, advisory locks?",
+    "Compare `ON CONFLICT DO UPDATE` (upsert) with `MERGE` (PostgreSQL 15+). How does each behave under concurrency, and what are the classic pitfalls of implementing upsert manually with UPDATE-then-INSERT?",
+    "Why is `LIMIT 20 OFFSET 100000` slow, and how does keyset (cursor/seek) pagination fix it? What does keyset pagination require of your ordering key, and what UX capability do you give up compared to offset pagination?",
+    "Why do applications use a connection pool with PostgreSQL, and why is the number of server connections itself a scarce resource (process-per-connection model)? What does PgBouncer add, and what breaks in transaction-pooling mode (prepared statements, session state)?",
+    "Explain JSONB in PostgreSQL: how it differs from the json type, which operators and GIN index options make querying it fast, and how you decide which fields belong in real columns vs inside a JSONB document.",
+    "How would you approach a production incident: 'the database is slow right now'? Cover pg_stat_activity (blocked and long-running queries), pg_locks, pg_stat_statements for top offenders, and checking for autovacuum, lock waits or a missing index after a deploy."
+  ]
+}

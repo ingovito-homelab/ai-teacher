@@ -1,0 +1,147 @@
+{
+  "id": "spring",
+  "title": "Spring",
+  "description": "Spring Framework and Spring Boot: IoC container, beans, configuration, AOP and transactions.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is Inversion of Control and Dependency Injection in Spring? Compare constructor, setter and field injection — which one is recommended and why?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q2",
+      "question": "Explain Spring bean scopes (singleton, prototype, request, session). What problem arises when a prototype-scoped bean is injected into a singleton, and how can you solve it?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q3",
+      "question": "How does Spring Boot auto-configuration work under the hood? What roles do @EnableAutoConfiguration, conditional annotations (@ConditionalOnClass etc.) and starters play?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q4",
+      "question": "How does @Transactional work in Spring? Explain the proxy mechanism, why self-invocation breaks it, and what propagation levels like REQUIRED and REQUIRES_NEW mean.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q5",
+      "question": "Describe the lifecycle of a Spring bean from instantiation to destruction. Where do BeanPostProcessors, @PostConstruct and aware-interfaces fit in, and how does AOP proxying hook into this lifecycle?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q6",
+      "question": "What is the difference between @Component, @Service, @Repository and @Controller? Do they behave differently at runtime, and what extra behavior does @Repository actually add?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q7",
+      "question": "How does Spring resolve ambiguity when multiple beans of the same type exist? Explain @Primary, @Qualifier and injection by field name — and what happens if none of them is used.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q8",
+      "question": "Compare @Configuration classes with @Bean methods to component scanning with @Component. What does proxyBeanMethods (full vs lite mode) change about calling one @Bean method from another?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q9",
+      "question": "How does external configuration work in Spring Boot? Explain the property source precedence (application.yml, profiles, env variables, command line), and compare @Value with @ConfigurationProperties.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q10",
+      "question": "What are Spring profiles and what problems do they solve? How do @Profile and spring.profiles.active work, and what are the downsides of overusing profiles for environment-specific configuration?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q11",
+      "question": "Walk through how Spring MVC handles an HTTP request: DispatcherServlet, HandlerMapping, argument resolvers, message converters (Jackson), and exception handling with @ControllerAdvice / @ExceptionHandler.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q12",
+      "question": "How do you handle circular dependencies between Spring beans? Why does constructor injection fail where field injection may work, how does the three-level cache of singletons come into play, and why is @Lazy only a workaround?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q13",
+      "question": "Explain Spring AOP: what is an aspect, advice, pointcut and join point? Compare JDK dynamic proxies with CGLIB, and list the practical limitations of proxy-based AOP (self-invocation, final methods, internal state).",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q14",
+      "question": "How does @Async work in Spring? What is required to enable it, what does it return, how are exceptions from async methods handled, and why should you configure your own thread pool instead of relying on defaults?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q15",
+      "question": "What is the Spring ApplicationEvent mechanism? Compare synchronous listeners with @Async ones, explain @TransactionalEventListener and its phases, and describe when events are a better choice than direct service calls.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q16",
+      "question": "Explain transaction isolation levels available via @Transactional (READ_COMMITTED, REPEATABLE_READ, SERIALIZABLE). What anomalies does each prevent, and how does rollbackFor interact with checked vs unchecked exceptions?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q17",
+      "question": "How do you test a Spring Boot application effectively? Compare @SpringBootTest with slice tests (@WebMvcTest, @DataJpaTest), explain how the test context cache works, and what @MockBean does to that cache.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q18",
+      "question": "Describe the Spring Security filter chain for a stateless REST API with JWT: where authentication happens, what SecurityContextHolder does, how method security (@PreAuthorize) is enforced, and why CSRF protection is usually disabled for such APIs.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q19",
+      "question": "Compare Spring MVC with Spring WebFlux. What does the reactive stack change about threading and backpressure, when does WebFlux actually pay off, and what are the risks of mixing blocking code (e.g. JDBC) into a reactive pipeline?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q20",
+      "question": "Design consideration: a @Transactional service method saves an entity and then publishes a message to a broker (e.g. Kafka/RabbitMQ). What consistency problems can occur if the transaction rolls back or the publish fails, and how would you solve them (transactional outbox, @TransactionalEventListener AFTER_COMMIT, idempotent consumers)?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "grpc",
+  "title": "gRPC",
+  "description": "gRPC: Protocol Buffers, HTTP/2, streaming, deadlines, error handling, load balancing and operations.",
+  "questions": [
+    "What is gRPC and how does it fundamentally differ from a typical REST/JSON API? Cover the contract, the wire format and how client code is produced.",
+    "What are Protocol Buffers? Explain what a `.proto` file defines, why the binary encoding is smaller and faster than JSON, and what role code generation plays in the developer workflow.",
+    "gRPC runs on HTTP/2. Which HTTP/2 features does it rely on — explain multiplexing, long-lived connections and header compression, and why gRPC couldn't be built the same way on HTTP/1.1.",
+    "Describe the four gRPC method types: unary, server streaming, client streaming and bidirectional streaming. Give a realistic use case for each.",
+    "Why are field numbers in protobuf messages so important? Explain the rules for evolving a schema safely: what you may add, what you must never change, and what `reserved` is for.",
+    "What happens on the wire when a client reads a field the server didn't send, or the server receives a field it doesn't know? Explain default values and unknown fields, and how they enable backward and forward compatibility.",
+    "Explain deadlines in gRPC: how a deadline differs from a client-side timeout, how deadline propagation works across a chain of services, and what `DEADLINE_EXCEEDED` means for work already in progress on the server.",
+    "How does error handling work in gRPC? Describe the standard status codes (e.g. `NOT_FOUND`, `UNAVAILABLE`, `INVALID_ARGUMENT`), and how the rich error model (`google.rpc.Status` with error details) improves on bare codes.",
+    "What is gRPC metadata and what are interceptors? Show how you would implement cross-cutting concerns like authentication tokens, request logging or tracing without touching every service method.",
+    "Explain channels and stubs: what a channel actually represents, why channels should be reused rather than created per call, and the difference between blocking, async and future stubs in Java.",
+    "Why is load balancing gRPC traffic harder than load balancing HTTP/1.1? Explain the problem long-lived HTTP/2 connections cause for L4 balancers, and compare client-side load balancing and lookaside/service-mesh (L7) approaches.",
+    "How does flow control work in gRPC streaming? Explain HTTP/2 flow control windows and what backpressure means when a slow consumer reads a fast server stream.",
+    "Describe gRPC's reliability knobs: keepalive pings, configurable retries and hedging. Why must automatic retries be limited to idempotent or safely-retryable calls, and what is a transparent retry?",
+    "How do browsers and external clients talk to gRPC services? Explain why grpc-web exists (what browsers can't do with HTTP/2 trailers), and how gateways like grpc-gateway transcode REST/JSON to gRPC.",
+    "How do you secure gRPC in production — TLS vs mTLS vs per-call credentials? And as a closing judgment call: when would you deliberately NOT choose gRPC for a service boundary, preferring REST or async messaging instead?"
+  ]
+}

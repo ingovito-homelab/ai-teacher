@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test \"test/*.test.js\"",
+    "import": "node scripts/import.js",
+    "export-pending": "node scripts/export-pending.js",
+    "apply-evaluations": "node scripts/apply-evaluations.js"
   },
   "dependencies": {
     "express": "^4.19.2",

@@ -35,6 +35,14 @@ export function setAssistRequired(id, questionId, assistRequired) {
   }).then(json)
 }
 
+export function requestExplanationUpdate(id, questionId, mode, context) {
+  return fetch(`/api/sections/${enc(id)}/explanation-request`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ questionId, mode, context }),
+  }).then(json)
+}
+
 export function clearExplanation(id, questionId) {
   return fetch(`/api/sections/${enc(id)}/explanation`, {
     method: 'DELETE',

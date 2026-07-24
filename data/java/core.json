@@ -98,10 +98,15 @@
     {
       "id": "q8",
       "question": "What is type erasure in Java generics? Name two concrete things you cannot do because of it, and explain what the compiler actually emits in place of the type parameters.",
-      "answer": "",
-      "evaluation": null,
-      "followUp": null,
-      "assistRequired": true
+      "answer": "So generics in Java exists during only the compilation time, and when compiled to bytecode they’re stripped. So List<T> become a List. So you cannot overload two methods f(List<integer> x) and f(List<String> x) because during the runtime they will look exactly the same. Java just casts stripped typed when returns the value. ",
+      "evaluation": {
+        "score": "7/10",
+        "verdict": "Good",
+        "feedback": "The mechanism is right: generics exist only at compile time, the type arguments are stripped from the bytecode, List<T> becomes raw List, and the compiler inserts casts at the use sites where the typed value comes back out. The overloading example is a correct 'thing you cannot do' — f(List<Integer>) and f(List<String>) erase to the identical signature f(List). But the question asked for TWO forbidden things and you gave one. Others: you cannot test `x instanceof List<String>` (no type argument exists at runtime — only List.class), you cannot write `new T()` or `new T[10]`, and T.class is illegal. One precision on what the compiler emits: T is replaced by its BOUND, not always Object — for <T extends Number>, T erases to Number; unbounded T erases to Object. The compiler also generates synthetic bridge methods to keep overriding working after erasure."
+      },
+      "followUp": "Why can't you write `new T()` or `new T[10]` inside a generic class, and what are the standard workarounds (think: passing a Class<T> token, Array.newInstance)?",
+      "answeredAt": "2026-07-18T01:54:08.387Z",
+      "hidden": true
     },
     {
       "id": "q9",
@@ -109,7 +114,8 @@
       "answer": "",
       "evaluation": null,
       "followUp": null,
-      "assistRequired": true
+      "assistRequired": true,
+      "explanation": "<p>Read wildcards as promises about what the list can safely do. <code>List&lt;? extends Number&gt;</code> means \"a list of some unknown subtype of Number\" — safe to <strong>read</strong> as Number, unsafe to add into. <code>List&lt;? super Integer&gt;</code> means \"a list of some unknown supertype of Integer\" — safe to <strong>add</strong> an Integer, but reads only come back as Object.</p><pre><code>List&lt;? extends Number&gt; src = List.of(1, 2.5);\nNumber n = src.get(0);   // OK – whatever it is, it IS a Number\nsrc.add(3);              // compile error – src could be a List&lt;Double&gt;!\n\nList&lt;? super Integer&gt; dst = new ArrayList&lt;Number&gt;();\ndst.add(42);             // OK – any supertype of Integer accepts an Integer\nInteger i = dst.get(0);  // compile error – element type unknown, reads give Object</code></pre><p><strong>PECS</strong>: a <em>producer</em> you read from gets <code>extends</code>; a <em>consumer</em> you write into gets <code>super</code>. Canonical signature: <code>Collections.copy(List&lt;? super T&gt; dest, List&lt;? extends T&gt; src)</code>.</p><p>Takeaway: <code>extends</code> forbids <code>add()</code> (except <code>null</code>); <code>super</code> forbids typed <code>get()</code>.</p>"
     },
     {
       "id": "q10",
@@ -140,10 +146,15 @@
     {
       "id": "q12",
       "question": "What is a fail-fast iterator and when does `ConcurrentModificationException` get thrown? Show two safe ways to remove elements from a collection while iterating over it.",
-      "answer": "",
-      "evaluation": null,
-      "followUp": null,
-      "assistRequired": true
+      "answer": "Fail fast is an approach when a list is iterated / being read in general and someone else modifies it - if will immediately raise an error. It happens by checking modifications count - if it has changed since starting reading the list - it will raise an error. Two ways - by iterating, iterative, and removeifpresent.",
+      "evaluation": {
+        "score": "6/10",
+        "verdict": "Partially correct",
+        "feedback": "The mechanism is right: the iterator snapshots the collection's modCount when created, checks it on every next(), and throws ConcurrentModificationException the moment the counts diverge — failing immediately instead of returning corrupted results. Worth adding: this is best-effort, not guaranteed, and it fires in SINGLE-threaded code too — the classic case is calling list.remove(x) inside a for-each loop (for-each uses an iterator under the hood). The two safe removal ways were the weakest part: 'by iterating, iterative, and removeifpresent' names neither precisely. They are (1) Iterator.remove() — the iterator's OWN remove method, which updates its expectedModCount so no exception fires, and (2) Collection.removeIf(predicate) (there is no removeIfPresent). A third option for concurrent contexts: CopyOnWriteArrayList or ConcurrentHashMap, whose iterators are not fail-fast."
+      },
+      "followUp": "Why doesn't Iterator.remove() throw ConcurrentModificationException while list.remove(x) mid-loop does — what exactly does the iterator's remove do with modCount/expectedModCount that the external call can't?",
+      "answeredAt": "2026-07-18T02:09:01.612Z",
+      "hidden": true
     },
     {
       "id": "q13",
@@ -188,40 +199,66 @@
     {
       "id": "q16",
       "question": "What is the happens-before relation in the Java Memory Model, and what is 'unsafe publication' of an object? Explain why the classic double-checked locking idiom is broken without `volatile`.",
-      "answer": "explain pls.",
+      "answer": "",
       "evaluation": null,
       "followUp": null,
-      "explanation": "<p><strong>happens-before</strong> is the JMM's ordering guarantee: if action A happens-before B, then A's memory effects are visible to B. It is established by, among others, unlocking a monitor before another thread locks it, and writing a <code>volatile</code> field before another thread reads it.</p><p><strong>Unsafe publication</strong> is making an object visible to other threads without such an edge, so they may see a half-constructed object — its fields still at default values.</p><pre><code>class Holder { int x = 42; }\nHolder h;                 // plain (non-volatile) field\n\n// Thread A: 1) allocate  2) write x=42  3) publish h\nh = new Holder();\n// Thread B:\nif (h != null) use(h.x);  // may see h != null but x == 0 !</code></pre><p>The compiler/CPU may reorder steps 2 and 3, so B sees the reference before the constructor's writes. <strong>Double-checked locking</strong> breaks the same way: without <code>volatile</code> a second thread can read a non-null but not-yet-initialized instance. <code>volatile</code> adds the happens-before edge that forbids that reordering.</p><pre><code>private static volatile Singleton inst;   // volatile is mandatory\nstatic Singleton get() {\n    if (inst == null) {\n        synchronized (Singleton.class) {\n            if (inst == null) inst = new Singleton();\n        }\n    }\n    return inst;\n}</code></pre>",
-      "assistRequired": true,
-      "answeredAt": "2026-07-17T12:00:00.000Z"
+      "explanation": "<p><strong>happens-before</strong> is the JMM's ordering guarantee: if action A happens-before B, then A's memory effects are visible to B. It is established by, among others, unlocking a monitor before another thread locks it, and writing a <code>volatile</code> field before another thread reads it.</p><p><strong>Unsafe publication</strong> is making an object visible to other threads without such an edge, so they may see a half-constructed object — its fields still at default values.</p><pre><code>class Holder { int x = 42; }\nHolder h;                 // plain (non-volatile) field\n\n// Thread A: 1) allocate  2) write x=42  3) publish h\nh = new Holder();\n// Thread B:\nif (h != null) use(h.x);  // may see h != null but x == 0 !</code></pre><p>The compiler/CPU may reorder steps 2 and 3, so B sees the reference before the constructor's writes. <strong>Double-checked locking</strong> breaks the same way: without <code>volatile</code> a second thread can read a non-null but not-yet-initialized instance. <code>volatile</code> adds the happens-before edge that forbids that reordering.</p><pre><code>private static volatile Singleton inst;   // volatile is mandatory\nstatic Singleton get() {\n    if (inst == null) {\n        synchronized (Singleton.class) {\n            if (inst == null) inst = new Singleton();\n        }\n    }\n    return inst;\n}</code></pre>"
     },
     {
       "id": "q17",
       "question": "Compare `synchronized`, `ReentrantLock`, and atomic classes (`AtomicInteger` etc.): what does each give you, and how would you choose between them for a shared counter vs a multi-step critical section?",
       "answer": "",
       "evaluation": null,
-      "followUp": null
+      "followUp": null,
+      "assistRequired": true,
+      "explanation": "<p>Three tools, three levels of control:</p><ul><li><strong>synchronized</strong> — block-structured mutual exclusion. An instance method locks <code>this</code>; a <em>static</em> method locks the <code>Class</code> object; <code>synchronized(obj)</code> locks <code>obj</code>. Reentrant. Cannot time out, cannot be interrupted while waiting, one implicit wait-set per lock.</li><li><strong>ReentrantLock</strong> — same exclusion, but explicit and more capable: <code>tryLock()</code>, <code>tryLock(1, SECONDS)</code>, <code>lockInterruptibly()</code>, optional fairness, several <code>Condition</code> queues. Must unlock in <code>finally</code>.</li><li><strong>AtomicInteger</strong> — lock-free updates of one variable via CAS (compare-and-swap): <code>incrementAndGet()</code>, <code>compareAndSet(expect, update)</code>. No blocking, no lock to forget.</li></ul><pre><code>// shared counter: atomic wins – no lock, no contention on a monitor\nAtomicInteger hits = new AtomicInteger();\nhits.incrementAndGet();\n\n// multi-step invariant: needs a lock, atomicity of ONE variable isn't enough\nlock.lock();\ntry {\n    if (balance &gt;= amount) balance -= amount;   // check + act must be one unit\n} finally { lock.unlock(); }</code></pre><p>Rule of thumb: one variable → atomic class; several variables or check-then-act → <code>synchronized</code> by default, <code>ReentrantLock</code> only when you need timeout, interruptibility, fairness or multiple conditions.</p>"
     },
     {
       "id": "q18",
       "question": "How does `ConcurrentHashMap` provide thread safety without locking the whole map? Why is a get-then-put sequence still a race condition on it, and which methods solve that atomically?",
       "answer": "",
       "evaluation": null,
-      "followUp": null
+      "followUp": null,
+      "assistRequired": true,
+      "explanation": "<p><code>ConcurrentHashMap</code> locks per <em>bin</em> (bucket), never the whole table. Reads are lock-free (volatile reads). Inserting into an empty bin is a CAS; only a collision briefly synchronizes on that bin's first node. Threads working on different buckets never contend — that's the whole trick.</p><pre><code>// RACE – each call is thread-safe, the SEQUENCE is not:\nif (map.get(k) == null)\n    map.put(k, expensive(k));      // two threads can both see null and both put\n\n// ATOMIC – the map runs check+insert as one operation under the bin lock:\nmap.computeIfAbsent(k, key -&gt; expensive(key));\nmap.merge(k, 1, Integer::sum);     // atomic counter update\nmap.putIfAbsent(k, v);\nmap.replace(k, oldV, newV);</code></pre><p>get-then-put is a classic <strong>check-then-act</strong> race: between your two calls another thread can interleave. The compound methods (<code>compute</code>, <code>computeIfAbsent</code>, <code>merge</code>, <code>putIfAbsent</code>, <code>replace</code>) execute the whole read-modify-write atomically. One caveat: the mapping function may run while the bin is locked — keep it cheap and never touch the same map inside it.</p>"
     },
     {
       "id": "q19",
       "question": "Compare `CompletableFuture` composition with virtual threads (Project Loom): how does each deal with blocking I/O, and how do virtual threads change the argument for writing async, callback-style code?",
       "answer": "",
       "evaluation": null,
-      "followUp": null
+      "followUp": null,
+      "assistRequired": true,
+      "explanation": "<p><code>CompletableFuture</code> doesn't make blocking cheap — it <em>avoids</em> blocking by composition: you chain callbacks that run when the result arrives, so no thread sits waiting. But a genuinely blocking call inside a stage still parks a real OS thread.</p><pre><code>// async composition: callbacks, no thread waits between stages\nhttp.getAsync(\"/user\")\n    .thenCompose(u -&gt; http.getAsync(\"/perms/\" + u.id()))\n    .thenApply(this::render)\n    .exceptionally(this::errorPage);</code></pre><p>Virtual threads flip the model: millions of cheap JVM-managed threads are <em>mounted</em> on a few OS carrier threads. On blocking I/O the JVM <strong>unmounts</strong> the virtual thread, the carrier picks up other work, and the thread is remounted when the I/O completes — blocking becomes nearly free.</p><pre><code>// Loom: plain sequential blocking style, scales like async\ntry (var exec = Executors.newVirtualThreadPerTaskExecutor()) {\n    var user  = exec.submit(() -&gt; http.get(\"/user\"));   // blocks — cheaply\n    var perms = exec.submit(() -&gt; http.get(\"/perms\"));\n    render(user.get(), perms.get());\n}</code></pre><p>Takeaway: virtual threads make straight-line blocking code scale, so callback-style async is no longer needed for throughput. <code>CompletableFuture</code> keeps its place for expressing parallel fan-out/fan-in — not for saving threads.</p>"
     },
     {
       "id": "q20",
       "question": "Java has a garbage collector, yet production services still leak memory. Name typical leak sources (e.g. static collections, listeners, `ThreadLocal` in thread pools, caches) and describe how you would confirm and locate a leak in a running JVM.",
       "answer": "",
       "evaluation": null,
-      "followUp": null
-    }
+      "followUp": null,
+      "assistRequired": true,
+      "explanation": "<p>The GC frees only <em>unreachable</em> objects — a leak is memory that is still reachable but will never be used again. Typical sources:</p><ul><li><strong>static collections</strong> — a static <code>Map</code>/list grows forever; everything it references is rooted.</li><li><strong>listeners/callbacks</strong> — registered, never unregistered; the subject keeps the listener (and all it captures) alive.</li><li><strong>ThreadLocal in thread pools</strong> — pool threads never die, so values not cleared with <code>remove()</code> live as long as the pool.</li><li><strong>unbounded caches</strong> — no size cap, TTL or eviction.</li></ul><pre><code>jcmd &lt;pid&gt; GC.heap_info            # heap after full GC keeps rising? leak\njcmd &lt;pid&gt; GC.heap_dump d1.hprof   # dump now, again in an hour → d2.hprof\n# open in Eclipse MAT: dominator tree, diff d1 vs d2,\n# then \"path to GC roots\" on the growing objects</code></pre><p>Confirm by trend, not by a single number: used heap measured <em>right after a full GC</em> climbing across hours is the leak signature. The path-to-GC-roots of the growing objects names the exact field holding them. In production, always set <code>-XX:+HeapDumpOnOutOfMemoryError</code>.</p>"
+    },
+    "Is Java pass-by-value or pass-by-reference? Explain what is actually copied when you pass an object to a method, and why a classic `swap(a, b)` method cannot work in Java while mutating a passed object's fields does.",
+    "Compare primitive types with their wrapper classes. What is autoboxing, where does it silently cost performance (e.g. collections, loops), and how can unboxing a wrapper throw a `NullPointerException`?",
+    "Explain the three uses of the `final` keyword: on variables, methods and classes. Why does a `final` reference not make the object immutable, and what does `final` on a field buy you in a multithreaded context?",
+    "What does `static` mean for fields and methods? Explain static initializer blocks and class initialization order — and why heavy use of static mutable state makes code hard to test.",
+    "What actually happens when you concatenate strings with `+`? Explain why `+` inside a loop is a problem, what `StringBuilder` does differently, and the difference between `StringBuilder` and `StringBuffer`.",
+    "Walk through Java's access modifiers: `private`, package-private (default), `protected` and `public`. What exactly does `protected` allow from a subclass in a different package, and how do modifiers support encapsulation?",
+    "Explain overloading vs overriding: which is resolved at compile time and which at runtime? Describe how the compiler picks among overloads (widening, autoboxing, varargs) and what covariant return types allow when overriding.",
+    "How are enums implemented under the hood in Java? Show how an enum can carry fields, constructors and per-constant method bodies, and explain when to reach for `EnumSet`/`EnumMap` and why an enum makes a good singleton.",
+    "Compare `Comparable` and `Comparator`: when does a class implement one vs the other? Explain building comparators with `Comparator.comparing(...).thenComparing(...)`, handling nulls, and what goes wrong in a `TreeMap` when the ordering is inconsistent with `equals`.",
+    "Why did `java.time` (Instant, LocalDateTime, ZonedDateTime) replace `Date` and `Calendar`? Explain what was broken about the old API, and when you should use `Instant` vs `LocalDateTime` vs `ZonedDateTime`.",
+    "Compare the four kinds of nested classes: static nested, inner, local and anonymous. What hidden reference does a non-static inner class hold, and how can that cause a memory leak?",
+    "How does a lambda differ from an anonymous inner class? Cover what `this` refers to in each, why captured local variables must be effectively final, and what the JVM does instead of generating a class file per lambda.",
+    "Describe the core functional interfaces in `java.util.function`: `Function`, `Supplier`, `Consumer`, `Predicate`, and their primitive/bi variants. Then explain the four kinds of method references and when a method reference beats a lambda.",
+    "How do you design an immutable class in Java? List the rules (final class, final fields, no setters, defensive copies of mutable components) and explain why immutable objects are inherently thread-safe and safe to share.",
+    "Map out the exception hierarchy: `Throwable`, `Error`, `Exception`, `RuntimeException`. Why should you (almost) never catch `Error`, what makes creating an exception expensive, and why is using exceptions for normal control flow a bad idea?",
+    "Why is `Object.clone()` with `Cloneable` widely considered broken, and what should you use instead (copy constructors, static factories)? Also: why was `finalize()` deprecated and what replaces it (`Cleaner`, try-with-resources)?",
+    "What is heap pollution with varargs and generics? Explain the warning on methods like `foo(List<String>... lists)`, what `@SafeVarargs` promises, and how `Arrays.asList` differs from `List.of`.",
+    "How does Java's built-in serialization work? Explain `serialVersionUID`, what happens on class evolution, why serialization is considered a security risk, and what teams use instead (JSON/protobuf, records + explicit mapping).",
+    "What is reflection and how do frameworks (DI containers, ORMs, test runners) rely on it? Discuss its costs, what `setAccessible(true)` does, and how the module system (JPMS) restricts reflective access.",
+    "Compare strong, soft, weak and phantom references. What does the garbage collector do with each, what is `WeakHashMap` good for, and when would a soft reference be used in a cache?"
   ]
 }

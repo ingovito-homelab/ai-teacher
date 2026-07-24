@@ -8,42 +8,54 @@
       "question": "Describe the JVM class loading process: loading, linking (verification, preparation, resolution) and initialization. What is the class loader delegation model and what problem does it prevent?",
       "answer": "",
       "evaluation": null,
-      "followUp": null
+      "followUp": null,
+      "assistRequired": true,
+      "explanation": "<p>Class loading has three phases. <strong>Loading</strong>: a class loader finds the <code>.class</code> bytes and creates the <code>Class</code> object. <strong>Linking</strong>: <em>verification</em> (bytecode is structurally valid and type-safe), <em>preparation</em> (static fields allocated, set to defaults — <code>0</code>/<code>null</code>, not your values), <em>resolution</em> (symbolic references to other classes/methods replaced with direct ones, often lazily). <strong>Initialization</strong>: static initializers and static field assignments run — only on first active use (<code>new</code>, static method call, static field access).</p><pre><code>class A {\n  static int x = 42;   // preparation: x = 0;  initialization: x = 42\n  static { System.out.println(\"A init\"); }  // first use, not JVM startup\n}</code></pre><p><strong>Delegation model</strong>: each loader asks its parent first (application → platform → bootstrap); only if the parent can't find the class does the child load it itself. This prevents spoofing core classes — a <code>java.lang.String</code> on your classpath can never replace the real one, because the bootstrap loader finds it first. Bonus: the same class name loaded by two different loaders yields two distinct classes — the basis of application-server and plugin isolation.</p>"
     },
     {
       "id": "q2",
       "question": "Java is 'compiled to bytecode, then JIT-compiled'. Explain tiered compilation: what do the interpreter, C1 and C2 each contribute, and what is deoptimization — when does the JVM throw compiled code away?",
       "answer": "",
       "evaluation": null,
-      "followUp": null
+      "followUp": null,
+      "assistRequired": true,
+      "explanation": "<p>Tiered compilation: code starts slow and gets faster as the JVM learns about it.</p><ul><li><strong>Interpreter</strong>: executes bytecode immediately, zero compile cost; counts invocations and loop iterations, gathers first profile data.</li><li><strong>C1</strong> (client compiler): once a method warms up, produces quick, lightly-optimized machine code with profiling counters baked in (branch frequencies, observed receiver types).</li><li><strong>C2</strong> (server compiler): for genuinely hot methods, compiles aggressively using C1's profile — deep inlining, escape analysis, speculative devirtualization.</li></ul><p><strong>Deoptimization</strong>: C2 code relies on assumptions ('only one implementation of this interface is loaded', 'this branch is never taken'). When one breaks, the JVM hits an <em>uncommon trap</em>: it throws the compiled code away, falls back to the interpreter, reprofiles and recompiles.</p><pre><code>Shape s = next();\ns.area();   // only Circle loaded for months → C2 inlines Circle.area()\n// a plugin loads Square → assumption invalid → deopt, recompile with real dispatch</code></pre>"
     },
     {
       "id": "q3",
       "question": "Map out the JVM's memory areas: heap, thread stacks, metaspace, code cache, and direct (off-heap) memory. For each, name one error or symptom you see when it is exhausted.",
       "answer": "",
       "evaluation": null,
-      "followUp": null
+      "followUp": null,
+      "assistRequired": true,
+      "explanation": "<p>Five memory areas, each with its own failure signature:</p><ul><li><strong>Heap</strong> — objects. Exhausted: <code>OutOfMemoryError: Java heap space</code> (often preceded by rising GC time / \"GC overhead limit exceeded\"). Tune: <code>-Xmx</code>.</li><li><strong>Thread stacks</strong> — one per thread, holds frames and locals. Deep recursion: <code>StackOverflowError</code>; too many threads: <code>OutOfMemoryError: unable to create native thread</code>. Tune: <code>-Xss</code>.</li><li><strong>Metaspace</strong> — class metadata, native memory. Classloader leaks (hot redeploys): <code>OutOfMemoryError: Metaspace</code>. Tune: <code>-XX:MaxMetaspaceSize</code>.</li><li><strong>Code cache</strong> — JIT-compiled machine code. Full: log warning <code>CodeCache is full. Compiler has been disabled</code> — no crash, the app silently degrades to interpreter speed.</li><li><strong>Direct (off-heap)</strong> — <code>ByteBuffer.allocateDirect</code>, NIO, Netty. Exhausted: <code>OutOfMemoryError: Direct buffer memory</code>; invisible in heap dumps. Tune: <code>-XX:MaxDirectMemorySize</code>.</li></ul><p>Takeaway: \"OutOfMemoryError\" alone says little — the <em>message</em> names the area, and each area has a completely different fix.</p>"
     },
     {
       "id": "q4",
       "question": "What is escape analysis and what optimizations does it enable (scalar replacement, lock elision)? Why can allocating short-lived objects in a hot loop still be effectively free?",
       "answer": "",
       "evaluation": null,
-      "followUp": null
+      "followUp": null,
+      "assistRequired": true,
+      "explanation": "<p>Escape analysis: the JIT (C2) proves an object never leaves the scope that created it — not stored to a field, not returned, not passed anywhere that could keep it. A non-escaping object doesn't need to be a real heap object.</p><ul><li><strong>Scalar replacement</strong>: the object is dissolved into its fields, which live in registers/on the stack — no allocation, nothing for the GC.</li><li><strong>Lock elision</strong>: synchronizing on a non-escaping object can't be observed by any other thread, so the lock is removed entirely.</li></ul><pre><code>for (int i = 0; i &lt; 1_000_000; i++) {\n  Point p = new Point(i, i);  // never escapes the loop body\n  sum += p.x + p.y;           // after EA: sum += i + i — no Point ever allocated\n}</code></pre><p>Why hot-loop short-lived objects are effectively free: either they're scalar-replaced (never allocated at all), or they die young — allocation in the TLAB is a pointer bump, and a young GC only pays for <em>surviving</em> objects, so dead ones cost ~nothing. Caveat: EA works only after inlining succeeds; passing the object to a big non-inlined method defeats it.</p>"
     },
     {
       "id": "q5",
       "question": "Compare the modern garbage collectors: G1, ZGC and Shenandoah. What does each optimize for, and how would you choose one for (a) a latency-sensitive API with a 100 GB heap and (b) a small batch job?",
       "answer": "",
       "evaluation": null,
-      "followUp": null
+      "followUp": null,
+      "assistRequired": true,
+      "explanation": "<p>All three are region-based; they optimize different corners of the throughput / latency / footprint triangle.</p><ul><li><strong>G1</strong> (default): balances throughput and pause time; young + mixed collections chase a pause target (<code>-XX:MaxGCPauseMillis</code>, default 200 ms). Pauses grow with heap and live set — fine up to tens of GB.</li><li><strong>ZGC</strong>: almost fully concurrent (colored pointers + load barriers); pauses sub-millisecond and <em>independent of heap size</em> — built for 100 GB+ heaps. Costs some throughput and extra CPU/memory. Generational since JDK 21.</li><li><strong>Shenandoah</strong>: same goal as ZGC — concurrent compaction, low pause — different lineage (Red Hat) and mechanics; also strong on modest heaps.</li></ul><p>(a) Latency-sensitive API with 100 GB heap → <strong>ZGC</strong>: G1 pauses would stretch with that live set; ZGC stays sub-ms. (b) Small batch job → pauses are irrelevant, total runtime matters → <strong>Parallel GC</strong> (max throughput per CPU) or just default G1. Takeaway: choose by SLO — pause-sensitive → ZGC/Shenandoah, throughput → Parallel, balanced default → G1.</p>"
     },
     {
       "id": "q6",
       "question": "A service's p99 latency spikes every few minutes while p50 stays flat. Walk through how you would confirm or rule out GC as the cause — which logs/flags and which metrics (pause time vs allocation rate) would you look at?",
       "answer": "",
       "evaluation": null,
-      "followUp": null
+      "followUp": null,
+      "assistRequired": true,
+      "explanation": "<p>p99 spikes every few minutes with flat p50 smells like stop-the-world pauses — but confirm, don't assume.</p><ol><li>Enable GC + safepoint logging: <code>-Xlog:gc*,safepoint:file=gc.log:time,uptime</code> — cheap enough for production.</li><li>Correlate timestamps: do GC pauses line up with the latency spikes? Compare pause <em>duration and frequency</em> against the spike pattern — e.g. a 250 ms young GC every ~2 minutes matching each spike = confirmed.</li><li>Check the <strong>allocation rate</strong> (log deltas, <code>jstat -gc 1s</code>, or JFR): high allocation → frequent young GCs; steadily rising old-gen occupancy after GC → promotion pressure, mixed/full GCs, or a leak.</li><li>If pauses don't align: read the safepoint log anyway — long time-to-safepoint stalls look exactly like GC but aren't — then look outside the JVM (CPU throttling, noisy neighbor, downstream dependency).</li></ol><p>Continuous metrics worth graphing: GC pause percentiles, GC frequency, allocation rate (MB/s), heap occupancy after collection. <code>jcmd PID JFR.start</code> captures all of them with ~1% overhead.</p>"
     },
     {
       "id": "q7",

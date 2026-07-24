@@ -6,9 +6,15 @@
     {
       "id": "q1",
       "question": "What are standalone components, and why did Angular move away from NgModules as the default? What used to live in an NgModule, and where does that responsibility go in a standalone app?",
-      "answer": "",
-      "evaluation": null,
-      "followUp": null
+      "answer": "Standalone components are the direction that angular team took and it’s basically a configuration of the component as a single module. \nThis component then is responsible for its configuration, providers etc. \nNgModules were to big and it involved a lot of components, making it difficult to dynamically load components. With standalone component we’ve got a configuration defined for every component which allows us to download them dynamically.\n\n----FOLLOW UP ANSWER-----\nI don't know. Explain follow up pls.",
+      "evaluation": {
+        "score": "4/10",
+        "verdict": "Partially correct",
+        "feedback": "Original question: the direction is right — a standalone component carries its own imports/providers, and per-component granularity enables loadComponent-style lazy loading — but lazy loading existed with NgModules too (loadChildren); the real drivers were boilerplate and indirection (you couldn't tell from a component where its template's directives came from). The responsibility mapping was missing: declarations/imports/exports move to the component's own imports array; module providers move to bootstrapApplication(App, appConfig) or route-level providers; routing modules become plain route arrays. Follow-up part: no answer was given, so here it is. App-wide single instance: providedIn:'root' (preferred — tree-shakable) or providers in the appConfig passed to bootstrapApplication; both land in the root environment injector. One instance per lazy-loaded route section: a providers array on the route object — Angular creates an environment injector for that route subtree, every component under it shares that one instance, and it stays alive once created. Behavioral difference from component-level providers: component providers create a NEW instance per component instance, destroyed together with the component (the service's ngOnDestroy runs) and shadowing any same-token instance above; route providers give one shared instance scoped to a URL section that survives as long as the route's injector does."
+      },
+      "followUp": "A wizard stores draft state in a WizardDraftService. The user fills step 1, navigates to a different page, then comes back. Compare what happens to the draft when the service is provided (a) in the wizard route's providers array versus (b) in the wizard component's providers array — and which would you pick for this UX?",
+      "answeredAt": "2026-07-18T02:36:53.019Z",
+      "hidden": true
     },
     {
       "id": "q2",
@@ -20,9 +26,15 @@
     {
       "id": "q3",
       "question": "What does a `@defer` block do? Explain the triggers (`on viewport`, `on interaction`, `when ...`), the `@placeholder`/`@loading`/`@error` sub-blocks, and what actually happens to the deferred code at build time.",
-      "answer": "",
-      "evaluation": null,
-      "followUp": null
+      "answer": "@defer can defer loading a piece of code which makes the overall application smaller in size those fetched quicker. @defer is that handy because it provides a full way to handling before fetched view, loading view, fetched view and error view.\nDifferent triggers will trigger that asynchronous loading differently - some of them more eagerly some of them more lazily. Deffered code is extracted from the main bundle and provides as a snippet during a build.",
+      "evaluation": {
+        "score": "6/10",
+        "verdict": "Good",
+        "feedback": "The core is correct on all three axes: @defer splits the deferred content out of the main bundle into its own chunk at build time (smaller initial download), the sub-blocks give you the full lifecycle UI (@placeholder before loading starts, @loading while fetching, @error on failure), and triggers control how eagerly the chunk is fetched. What's missing is the concrete trigger semantics the question asked for: `on idle` is the default (loads when the browser is idle); `on viewport` loads when the @placeholder scrolls into view — implemented with an IntersectionObserver, which is why it requires a @placeholder; `on interaction`/`on hover` load on user contact; `when expr` loads once an arbitrary boolean becomes true. Also worth knowing: `prefetch` is a separate modifier (e.g. `@defer (on interaction; prefetch on idle)`) — fetch the chunk early but render it late; and @loading supports `after`/`minimum` to avoid spinner flicker."
+      },
+      "followUp": "Why does `@defer (on viewport)` require a @placeholder block to work, and what does `@defer (on interaction; prefetch on idle)` buy you over a plain `on interaction` trigger?",
+      "answeredAt": "2026-07-18T02:36:53.019Z",
+      "hidden": true
     },
     {
       "id": "q4",
@@ -36,7 +48,8 @@
       "question": "What is zoneless change detection (`provideZonelessChangeDetection`)? How does Angular know when to update the view without zone.js, and what does your code have to do differently for the UI to stay in sync?",
       "answer": "",
       "evaluation": null,
-      "followUp": null
+      "followUp": null,
+      "explanation": "<p>Zoneless (<code>provideZonelessChangeDetection()</code>) removes zone.js entirely. Angular no longer guesses from patched async APIs; it re-renders only when something <em>notifies</em> it. The notification sources:</p><ul><li>a <strong>signal read in a template</strong> changes — the template is a tracked consumer; the write marks it dirty and schedules a render for that component;</li><li><code>markForCheck()</code> is called — which is exactly what the <code>async</code> pipe does internally;</li><li>a <strong>template event listener</strong> fires (<code>(click)</code>, <code>(input)</code>, …);</li><li>host bindings / <code>afterNextRender</code>-style APIs complete.</li></ul><pre><code>@Component({ template: `{{ count() }} &lt;button (click)=\"inc()\"&gt;+&lt;/button&gt;` })\nclass Counter {\n  count = signal(0);\n  inc() { this.count.update(v =&gt; v + 1); }    // schedules render — works\n\n  broken() {\n    setTimeout(() =&gt; this.plain++, 500);      // zoneless: UI never updates!\n  }\n}</code></pre><p>Note the direction: a write <em>pushes</em> a dirty notification; Angular then <em>pulls</em> current values during the scheduled render (push-then-pull — nothing polls). Your code must therefore keep view state in signals (or go through the <code>async</code> pipe / <code>markForCheck()</code>); mutating plain fields from timers, promises or third-party callbacks silently stops updating the view — the classic zoneless bug. Bonus: components written this way are already OnPush-compatible, and the same model is what makes SSR + hydration scheduling cleaner.</p>"
     },
     {
       "id": "q6",
@@ -50,14 +63,23 @@
       "question": "What are Signal Forms (the experimental signal-based forms API), and what pain points of Reactive Forms are they trying to fix — think typing, deriving validity as state, and synchronizing the model with the view?",
       "answer": "",
       "evaluation": null,
-      "followUp": null
+      "followUp": null,
+      "assistRequired": true,
+      "explanation": "<p>Signal Forms (experimental, <code>@angular/forms/signals</code>) rebuild forms on top of signals: your data lives in a plain <code>signal</code> holding the model object, and the form is a typed view over it — every field's value, validity, touched/dirty state is exposed as signals <em>derived</em> from that model.</p><pre><code>const model = signal({ email: '', age: 0 });\nconst f = form(model, (p) =&gt; {\n  required(p.email);\n  min(p.age, 18);\n});\n// template: &lt;input [control]=\"f.email\" /&gt;\nf.email().value();   // always in sync — the signal IS the source of truth\nf.age().valid();     // validity is computed state, recalculated on writes</code></pre><p>Reactive Forms pain points it targets:</p><ul><li><strong>Typing</strong> — field types are inferred from the model object; no hand-built FormGroup generics drifting out of sync with the data shape.</li><li><strong>Validity as state</strong> — valid/errors are computed signals you just read (in templates, in <code>computed()</code>), instead of subscribing to statusChanges/valueChanges observables and mirroring them into properties.</li><li><strong>Model–view sync</strong> — one source of truth; no patchValue/setValue ceremony copying data between component state and FormControls, in either direction.</li></ul><p>Caveat: experimental — the API surface (<code>form()</code>, schema validators, <code>[control]</code>) may still change before it stabilizes.</p>"
     },
     {
       "id": "q8",
       "question": "How has Angular's toolchain modernized in recent versions? Cover the esbuild/Vite-based `application` builder replacing webpack, and the move of unit testing away from Karma (Vitest/Web Test Runner). What do these changes buy day-to-day?",
-      "answer": "",
-      "evaluation": null,
-      "followUp": null
+      "answer": "Webpack was really have, vite-based application is much lighter, faster. Karma also was buggy, vitest brings freshness. Pls describe more things.",
+      "evaluation": {
+        "score": "3/10",
+        "verdict": "Partially correct",
+        "feedback": "The sentiment is right — webpack was heavy, the new toolchain is faster, Karma was flaky and is deprecated — but there are no mechanics. The 'application' builder replaced the webpack-based 'browser' builder as the default (v17+): bundling is done by esbuild (written in Go, parallel, typically 5-10x faster than webpack's JavaScript pipeline), and ng serve runs a Vite dev server on top, serving esbuild output from memory with fast incremental updates. It also unified builds: one builder now handles the browser bundle plus SSR and prerendering. Testing: Karma is deprecated; the replacements are Vitest (the new default direction — ESM-native, millisecond startup, watch mode, jsdom or real-browser execution) and Web Test Runner. Day-to-day wins: cold builds in seconds instead of minutes, near-instant rebuilds, less config ceremony, faster CI. More detail with the angular.json builder names in the explanation."
+      },
+      "followUp": "In ng serve with the application builder, what work does esbuild do versus what work does Vite do — and why does that division make a cold dev-server start so much faster than webpack's?",
+      "answeredAt": "2026-07-19T02:24:03.202Z",
+      "assistRequired": true,
+      "explanation": "<p>Two modernizations: build and test.</p><ul><li><strong>Build — the <code>application</code> builder</strong> (default since v17, package <code>@angular/build</code>): bundling by <em>esbuild</em> — written in Go, parallel, typically 5–10× faster than webpack's JS pipeline — and <code>ng serve</code> powered by <em>Vite</em>, which serves the esbuild output from memory with fast incremental rebuilds. One builder covers the browser bundle, SSR and prerendering, replacing the separate webpack browser/server builders.</li><li><strong>Test</strong>: Karma is deprecated. Replacements: <em>Vitest</em> (Angular's chosen direction — ESM-native, starts in milliseconds, smart watch mode, runs in jsdom or a real browser) and Web Test Runner.</li></ul><pre><code>// angular.json\n\"builder\": \"@angular/build:application\"    // esbuild bundling + Vite dev server\n\"builder\": \"@angular/build:unit-test\"      // Vitest-based ng test</code></pre><p>Day-to-day: cold builds in seconds instead of minutes, near-instant rebuilds on save, no <code>karma.conf.js</code>, faster CI. Trade-off: no webpack plugin ecosystem — custom webpack tweaks need rethinking.</p>"
     }
   ]
 }

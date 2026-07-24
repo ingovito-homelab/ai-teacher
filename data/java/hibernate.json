@@ -1,0 +1,87 @@
+{
+  "id": "hibernate",
+  "title": "Hibernate",
+  "description": "Hibernate and JPA: entity lifecycle, persistence context, fetching strategies and common pitfalls.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the relationship between JPA and Hibernate? Explain the roles of EntityManager, the persistence context and the first-level cache.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q2",
+      "question": "Describe the entity lifecycle states in Hibernate (transient, managed/persistent, detached, removed). What is dirty checking and when does Hibernate actually flush changes to the database?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q3",
+      "question": "What is the N+1 select problem? Show how it arises with lazy-loaded associations and describe at least two ways to fix it (e.g. fetch join, @EntityGraph, batch fetching).",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q4",
+      "question": "Compare LAZY and EAGER fetching. Why is EAGER on collections considered harmful, and what causes a LazyInitializationException? Why is the Open Session in View pattern controversial?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q5",
+      "question": "How does Hibernate handle concurrent modifications? Compare optimistic locking with @Version against pessimistic locking, and explain what happens when an OptimisticLockException is thrown.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    "What is the difference between EntityManager.find() and getReference() (or Hibernate's get() vs load())? When does each hit the database, and when would a proxy returned by getReference() throw an exception?",
+    "Explain the common identifier generation strategies (IDENTITY, SEQUENCE, TABLE, AUTO, UUID). Why does IDENTITY prevent JDBC batching of inserts, and which strategy would you pick for a high-throughput PostgreSQL application?",
+    "How should you implement equals() and hashCode() for JPA entities? Explain the problems with using the database-generated id or all fields, and how proxies and detached entities complicate this.",
+    "How do you correctly map a bidirectional @OneToMany/@ManyToOne association? Explain what mappedBy means, which side is the owning side, and why helper methods that sync both sides are recommended.",
+    "What do the JPA cascade types (PERSIST, MERGE, REMOVE, etc.) do, and how is orphanRemoval = true different from CascadeType.REMOVE? Give an example where using the wrong one deletes data you wanted to keep.",
+    "What is the difference between merge() and persist() (and Hibernate's legacy update()/saveOrUpdate())? Describe what happens step by step when you merge a detached entity, including which instance ends up managed.",
+    "Compare the JPA inheritance mapping strategies: SINGLE_TABLE, JOINED and TABLE_PER_CLASS. What are the trade-offs of each in terms of schema, nullability, polymorphic queries and performance, and where does @MappedSuperclass fit in?",
+    "When does Hibernate flush the persistence context, and how do FlushModeType.AUTO and COMMIT differ? Why can a JPQL query trigger a flush before it runs, and how does the order of SQL statements at flush time differ from the order of your Java calls?",
+    "Explain Hibernate's second-level cache and query cache: what gets stored, how they relate to the first-level cache, the cache concurrency strategies (READ_ONLY, READ_WRITE, etc.), and when enabling them can hurt more than help.",
+    "How do you diagnose and fix a slow Hibernate-based application in production? Cover enabling SQL/statistics logging, spotting N+1 and cartesian-product fetch joins, DTO projections instead of entities, read-only queries, and JDBC batching of writes.",
+    {
+      "type": "quiz",
+      "question": "Which statements about the JPA persistence context (first-level cache) are true?",
+      "options": [
+        "Two find() calls for the same id within one persistence context return the same instance",
+        "The first-level cache is shared between all EntityManagers in the application",
+        "Changes to a managed entity are written to the database via dirty checking, without calling an update method",
+        "The persistence context is cleared automatically after every query"
+      ],
+      "correct": [0, 2]
+    },
+    {
+      "type": "quiz",
+      "question": "Iterating over a list of Orders and calling order.getCustomer() on each one fires an extra SELECT per order (the N+1 problem). Which changes eliminate or substantially reduce the number of queries?",
+      "options": [
+        "Use a JPQL fetch join: SELECT o FROM Order o JOIN FETCH o.customer",
+        "Change the association to FetchType.LAZY",
+        "Apply an @EntityGraph to the query so customers load together with the orders",
+        "Enable batch fetching with @BatchSize so customers are loaded in chunks",
+        "Increase the JDBC connection pool size"
+      ],
+      "correct": [0, 2, 3]
+    },
+    {
+      "type": "quiz",
+      "question": "Which statements about optimistic locking with @Version are true?",
+      "options": [
+        "Hibernate appends the version column to the WHERE clause of UPDATE and DELETE statements",
+        "A conflict is detected as soon as two transactions read the same row",
+        "The @Version field should be incremented manually after each change",
+        "@Version acquires a database row lock that is held until the transaction commits",
+        "Optimistic locking only works with SERIALIZABLE isolation"
+      ],
+      "correct": [0]
+    }
+  ]
+}

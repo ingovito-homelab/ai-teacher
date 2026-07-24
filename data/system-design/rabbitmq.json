@@ -1,0 +1,17 @@
+{
+  "id": "rabbitmq",
+  "title": "RabbitMQ",
+  "description": "RabbitMQ and AMQP: exchanges, queues, acknowledgements, durability, dead-lettering, ordering and HA.",
+  "questions": [
+    "Describe the AMQP messaging model used by RabbitMQ: what are producers, exchanges, queues and bindings, and why do producers publish to exchanges instead of directly to queues?",
+    "Compare the exchange types: direct, fanout, topic and headers. Give a concrete routing scenario where each one is the right choice, including how topic wildcards (`*` and `#`) work.",
+    "How do consumer acknowledgements work? Explain ack, nack and reject (with and without requeue), auto-ack vs manual ack, and what happens to unacknowledged messages when a consumer connection dies.",
+    "What does it take for a message to survive a broker restart? Explain durable queues, persistent messages and publisher confirms — and why each of the three is needed for reliable delivery.",
+    "What is consumer prefetch (`basic.qos`) and why is an unlimited prefetch dangerous? Explain how prefetch interacts with fair dispatch across multiple consumers on one queue.",
+    "Explain dead-letter exchanges: which events cause a message to be dead-lettered, and how would you build a delayed-retry mechanism using DLX plus per-queue or per-message TTL?",
+    "What ordering guarantees does RabbitMQ give? Explain how competing consumers, requeues and retries can reorder messages, and what you can do when strict ordering matters.",
+    "RabbitMQ gives at-least-once delivery at best. Explain why exactly-once is not achievable end-to-end, where duplicates come from, and how consumers should be designed (idempotency, deduplication) to cope.",
+    "Compare quorum queues with classic mirrored queues for high availability: how does each replicate, why were mirrored queues deprecated, and what trade-offs do quorum queues bring (Raft, memory, poison messages)?",
+    "What happens when a RabbitMQ queue grows faster than consumers can drain it? Explain memory/disk alarms and publisher flow control, and describe the levers you have (more consumers, prefetch tuning, TTL, max-length policies) to keep the system stable."
+  ]
+}

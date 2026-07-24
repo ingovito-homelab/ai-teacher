@@ -1,0 +1,21 @@
+{
+  "id": "kafka",
+  "title": "Kafka & Messaging Systems",
+  "description": "Apache Kafka and messaging systems in general: the log model, partitions, consumer groups, delivery semantics, replication and choosing a broker.",
+  "questions": [
+    "What is Apache Kafka, and how does its distributed-log model differ from a traditional message broker like RabbitMQ where messages are removed once consumed? What new use cases does keeping the log open up?",
+    "Explain topics, partitions and offsets. What ordering guarantee does Kafka actually give, and how does the message key determine which partition a record lands on — with what consequence for ordering?",
+    "What is a consumer group? Explain how partitions are assigned to consumers in a group, and how the same topic can serve both a work-queue pattern (competing consumers) and a pub/sub pattern (multiple groups).",
+    "Compare the delivery semantics in messaging systems: at-most-once, at-least-once and exactly-once. What do the producer's `acks` setting, the idempotent producer and Kafka transactions each contribute?",
+    "How does consumer offset management work? Compare auto-commit with manual commit (before vs after processing), and explain how each choice maps to message loss vs duplicate processing after a crash.",
+    "Explain Kafka replication: partition leaders and followers, the in-sync replica (ISR) set, and how `acks=all` together with `min.insync.replicas` prevents data loss when a broker fails.",
+    "Compare time/size-based retention with log compaction. How does a compacted topic behave, and when would you use one (e.g. changelog, event sourcing, restoring state)?",
+    "What goes wrong operationally with partitions? Discuss choosing a partition count (and why increasing it later breaks key ordering), hot partitions caused by skewed keys, and what a consumer-group rebalance does to processing.",
+    "What is consumer lag, why does it matter, and how do you deal with a consumer group that can't keep up? Discuss scaling limits (consumers vs partitions), batch tuning and backpressure in log-based vs push-based brokers.",
+    "You need asynchronous communication between services: when would you pick Kafka, when a queue broker like RabbitMQ, and when neither (just synchronous calls)? Compare them on throughput, ordering, routing flexibility, replay and operational cost.",
+    "Explain Kafka transactions and the exactly-once processing (EOS) model in a consume-transform-produce pipeline: what do the transactional producer, `isolation.level=read_committed` and offset commits inside the transaction each contribute — and what does EOS still NOT protect (side effects like DB writes or emails)?",
+    "What happens during a consumer group rebalance? Compare eager (stop-the-world) with cooperative/incremental rebalancing, explain what static group membership is for, and describe the symptoms of a rebalance storm caused by slow processing and `max.poll.interval.ms`.",
+    "Your consumer processes a record, writes to PostgreSQL, and then crashes before committing the offset. Walk through what happens on restart, why this forces idempotent processing, and compare deduplication strategies: idempotency keys in the DB, upserts, and storing processed offsets in the same transaction as the data.",
+    "How do you handle poison messages and retries in Kafka, where there is no built-in dead-letter mechanism like RabbitMQ's DLX? Compare blocking retries in the consumer, retry topics with backoff (the pattern behind Spring/Micronaut retry topics), and a dead-letter topic — including what each does to ordering guarantees."
+  ]
+}

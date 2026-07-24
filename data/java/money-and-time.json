@@ -1,0 +1,15 @@
+{
+  "id": "money-and-time",
+  "title": "Money & Time (Fintech)",
+  "description": "Representing money, precision, rounding and time correctly — the questions every fintech interview asks",
+  "questions": [
+    "Why must you never use `double` or `float` to represent money? Explain how binary floating point stores values, why `0.1 + 0.2 != 0.3`, and show a concrete financial calculation where the error becomes visible.",
+    "What is the difference between `new BigDecimal(0.1)`, `new BigDecimal(\"0.1\")` and `BigDecimal.valueOf(0.1)`? Explain exactly what value each produces and which construction rule you should follow in financial code.",
+    "In `BigDecimal`, why does `equals()` treat `1.0` and `1.00` as different while `compareTo()` treats them as equal? Explain scale vs precision, and what bugs this causes when BigDecimals end up as HashMap keys or in `equals`-based assertions.",
+    "Walk through the `RoundingMode` options (HALF_UP, HALF_EVEN, DOWN, CEILING...). Why is HALF_EVEN called 'banker's rounding' and when is it required? Why does `divide()` without a rounding mode sometimes throw `ArithmeticException`?",
+    "How would you design a `Money` value type for a trading system? Discuss pairing amount with currency, preventing operations across currencies, choosing and fixing the scale, and the alternative of storing amounts as `long` minor units (cents) — when is each approach better?",
+    "How should money be stored in a relational database and transported over JSON APIs? Discuss NUMERIC/DECIMAL vs FLOAT columns, why JSON numbers are dangerous for amounts, and where rounding should (and should not) happen in a multi-step calculation pipeline.",
+    "Explain the core `java.time` types: `Instant`, `LocalDateTime`, `ZonedDateTime` and `OffsetDateTime`. For an order timestamp in a trading system serving clients in many countries, which type do you store and which do you display — and why is storing `LocalDateTime` a bug?",
+    "What problems do daylight saving time transitions cause in scheduled and time-range logic (e.g. a day that is 23 or 25 hours long)? How do `ZonedDateTime` arithmetic and storing UTC-with-zone-conversion-at-the-edge each handle this, and where would naive code double-charge or skip a run?"
+  ]
+}

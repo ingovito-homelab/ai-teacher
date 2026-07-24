@@ -6,44 +6,79 @@
     {
       "id": "q1",
       "question": "What is an Observable, and how does it differ from a Promise? Cover laziness, multiple emissions, and cancellation via unsubscribe.",
-      "answer": "",
-      "evaluation": null,
-      "followUp": null
+      "answer": "Observable is push-based mechanism to handle async events. Observable is lazy - it's triggered on the subscription.  Promise must be handled, via then and catch. ",
+      "evaluation": {
+        "score": "5/10",
+        "verdict": "Partially correct",
+        "feedback": "What's there is right: an Observable is push-based, and it's lazy — the producer runs only when someone subscribes. But the question named three comparison axes and the answer covers one. Missing: (1) the Promise side of laziness — a Promise is EAGER, the work starts the moment it's created, .then() just attaches to a result already in flight; (2) multiple emissions — a Promise settles exactly once, an Observable can emit 0..infinity values over time (that's why it models streams: keystrokes, websockets, intervals); (3) cancellation — unsubscribe() runs the producer's teardown and stops the work, while a Promise cannot be cancelled at all. 'Promise must be handled via then and catch' describes the API surface, not a semantic difference — Observables have subscribe/error callbacks too. One more classic: each subscribe re-runs the producer (cold observable) unless you share it."
+      },
+      "followUp": "Two parts of the UI subscribe to the same Observable wrapping one HttpClient.get(). How many HTTP requests fire, why, and what does shareReplay(1) change?",
+      "assistRequired": true,
+      "answeredAt": "2026-07-19T01:58:37.188Z",
+      "explanation": "<p>An Observable is a lazy, push-based stream: nothing runs until you subscribe, it can emit many values over time, and unsubscribing cancels the work. A Promise is eager (starts the moment it's created), settles exactly once, and cannot be cancelled.</p><pre><code>const obs$ = new Observable(sub =&gt; {\n  const id = setInterval(() =&gt; sub.next(Date.now()), 1000);\n  return () =&gt; clearInterval(id);          // teardown, runs on unsubscribe\n});\n// nothing has happened yet — lazy\nconst s = obs$.subscribe(v =&gt; console.log(v));   // NOW the interval starts\ns.unsubscribe();                           // interval cleared — cancellation\n\nconst p = fetch('/api');   // already running — eager, one result, no cancel</code></pre><p>Takeaway: Promise = one eager, uncancellable value. Observable = a cancellable stream of 0..∞ values, started fresh per subscription (each subscribe re-runs the producer unless you share it).</p>"
     },
     {
       "id": "q2",
       "question": "Explain the difference between `switchMap`, `mergeMap`, `concatMap` and `exhaustMap`. For a type-ahead search box firing an HTTP request per keystroke, which one do you pick and why?",
-      "answer": "",
-      "evaluation": null,
-      "followUp": null
+      "answer": "switchMap will switch into another observable (another http response), mergeMap will merge two observables.",
+      "evaluation": {
+        "score": "3/10",
+        "verdict": "Incorrect",
+        "feedback": "This one needs a rebuild. 'switchMap switches into another observable' gestures at the right thing but misses its defining behavior: it CANCELS the previous inner observable when a new outer value arrives. 'mergeMap merges two observables' is wrong — that describes the merge() combination operator; mergeMap maps EACH outer emission to an inner observable and runs all of them concurrently. concatMap (queue, one at a time, order preserved) and exhaustMap (ignore new outer values while one is in flight) weren't attempted, and the type-ahead question wasn't answered: it's switchMap, because a new keystroke makes the in-flight request obsolete — cancelling it both saves work and kills the out-of-order-response bug where a slow old response overwrites fresh results. All four differ ONLY in how they handle a new outer value while an inner one is still running — see the explanation."
+      },
+      "followUp": "Your type-ahead accidentally uses mergeMap instead of switchMap. Describe the exact user-visible bug when an older request responds slower than a newer one — and why exhaustMap would be even worse here.",
+      "assistRequired": true,
+      "answeredAt": "2026-07-19T01:58:37.188Z",
+      "explanation": "<p>All four operators map each value from an outer stream to an inner Observable (e.g. an HTTP call). They differ <em>only</em> in what happens when a new outer value arrives while the previous inner Observable is still running:</p><ul><li><strong>switchMap</strong> — cancel the running inner, switch to the new one. Only the latest result matters.</li><li><strong>mergeMap</strong> — run all inners concurrently; results arrive in completion order (can interleave!).</li><li><strong>concatMap</strong> — queue: start the next inner only after the previous completes. Order preserved.</li><li><strong>exhaustMap</strong> — while an inner is running, IGNORE new outer values (classic for a submit button being spammed).</li></ul><pre><code>results$ = this.query$.pipe(\n  debounceTime(300),\n  distinctUntilChanged(),\n  switchMap(q =&gt; this.http.get&lt;Item[]&gt;('/search', { params: { q } }))\n);</code></pre><p>Type-ahead → <strong>switchMap</strong>: each keystroke obsoletes the in-flight request, so cancel it — this also eliminates the race where a slower old response lands last and overwrites newer results. Rules of thumb: latest-wins reads → switchMap; independent parallel work → mergeMap; ordered writes → concatMap; ignore-while-busy actions → exhaustMap.</p>"
     },
     {
       "id": "q3",
       "question": "What are HTTP interceptors in Angular and what are they typically used for? Sketch how a functional interceptor (`HttpInterceptorFn`) adds an auth token and handles a 401 response.",
-      "answer": "",
-      "evaluation": null,
-      "followUp": null
+      "answer": "HTTP interceptors ale interceptor, then can intercept request or response after being triggered or after being handled. Then're used to add extra headers (like caching for request or handling 403 (redirect)).\n\nHttpInterceptorFn - before the request is being send it adds and auth token to it, once the response is being recieved - we check if the status is 401 - if so we can reject the promise.\n\n",
+      "evaluation": {
+        "score": "5/10",
+        "verdict": "Partially correct",
+        "feedback": "The role is right: interceptors sit in the HTTP pipeline, see every outgoing request and incoming response, and centralize cross-cutting concerns — auth headers, error handling/redirects, caching, logging, retries. The sketch has the right two beats (attach token before send, react to 401 after) but two corrections. First, there is no promise to reject — HttpClient is Observable-based; you handle the 401 with catchError on the stream next() returns, then either redirect to login or try a token refresh and RETRY the request. Second, the key mechanical detail is missing: HttpRequest is IMMUTABLE, so you cannot just add a header — you must clone: next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })). A functional interceptor is just (req, next) => Observable, registered via provideHttpClient(withInterceptors([authInterceptor])), and interceptors chain in registration order — request flows down the list, response bubbles back up in reverse."
+      },
+      "followUp": "Why is HttpRequest immutable — what concretely would break in an interceptor chain with retries (e.g. retry after token refresh) if interceptors mutated the shared request object instead of cloning?",
+      "answeredAt": "2026-07-19T01:58:37.188Z"
     },
     {
       "id": "q4",
       "question": "When do you have to unsubscribe from an Observable in Angular, and when is it unnecessary? Compare the `async` pipe, `takeUntilDestroyed()`, and manual unsubscribe in `ngOnDestroy` — which leaks are you preventing?",
-      "answer": "",
-      "evaluation": null,
-      "followUp": null
+      "answer": "Everytime when observable is stop being used and we know it wasn't completed (http requests are completed by default for example).\nSo when we destroy the component we can unsubscribe it - we prevent memory leaks. Async pipe is used in the template and will unsubscribe it for us when the view is gone. takeUntilDestroyed() is added to the observable pipe ale it will be triggerd on the component destroy.\n",
+      "evaluation": {
+        "score": "7/10",
+        "verdict": "Good",
+        "feedback": "The rules are right: unsubscribe when the observable doesn't complete on its own and the subscriber's lifetime ends (component destroyed); HttpClient observables complete after one emission so they rarely leak; async pipe subscribes in the template and unsubscribes when the view is destroyed; takeUntilDestroyed() goes in the pipe and completes the stream on component destroy. Two gaps. First, WHAT actually leaks: the subscription's callback captures `this`, so the destroyed component — and everything it references, including DOM nodes — stays reachable and can't be GC'd; on top of that, the work keeps running (interval ticks, websocket messages, store emissions firing handlers on a dead component). Second, the fine print: takeUntilDestroyed() must be called in an injection context (constructor / field initializer) or be given a DestroyRef explicitly; and the async pipe does more than unsubscribe — it calls markForCheck() on each emission, which is what makes it OnPush-friendly. Manual ngOnDestroy unsubscribe still has a place: subscriptions created outside injection context or dynamic ones you track by hand."
+      },
+      "followUp": "Why should takeUntilDestroyed() usually be the LAST operator in the pipe? Construct the leak: what keeps running after destroy if you write pipe(takeUntilDestroyed(ref), switchMap(() => interval(1000)))?",
+      "answeredAt": "2026-07-19T02:00:38.630Z"
     },
     {
       "id": "q5",
       "question": "What does `ChangeDetectionStrategy.OnPush` change about when a component is re-checked? List the things that mark an OnPush component dirty, and explain why signals make OnPush components 'just work'.",
       "answer": "",
       "evaluation": null,
-      "followUp": null
+      "followUp": null,
+      "assistRequired": true,
+      "explanation": "<p>Default change detection re-checks <em>every</em> component on every tick. <code>OnPush</code> flips the contract: skip this component and its subtree unless it has been marked dirty. What marks an OnPush component dirty:</p><ul><li>an <code>@Input</code> receives a <strong>new reference</strong> (mutating the same object/array does NOT count);</li><li>an event bound in its own template fires (<code>(click)</code> etc.);</li><li><code>markForCheck()</code> is called — the <code>async</code> pipe does this on every emission;</li><li>a <strong>signal</strong> its template reads changes value.</li></ul><pre><code>@Component({\n  changeDetection: ChangeDetectionStrategy.OnPush,\n  template: `{{ items().length }}`\n})\nclass ListCmp {\n  items = signal&lt;Item[]&gt;([]);\n  add(i: Item) { this.items.update(a =&gt; [...a, i]); }  // view updates\n  // this.items().push(i)  ← same reference inside the signal: stays stale\n}</code></pre><p>Signals make OnPush \"just work\" because the template registers itself as a consumer of every signal it reads: a write notifies exactly the components that depend on that signal — no immutable-reference discipline on inputs, no manual <code>markForCheck()</code>, no async-pipe plumbing just to trigger updates.</p>"
     },
     {
       "id": "q6",
       "question": "Your Angular app's list page is slow: typing in a filter box janks and scrolling stutters. Walk through how you would diagnose and fix it — think `track` in `@for`, OnPush/signals, moving work out of templates, `@defer`, and virtual scrolling.",
-      "answer": "",
-      "evaluation": null,
-      "followUp": null
-    }
+      "answer": "At first i'd use chrome lighthouse to check the performance, then I'd check what event are being triggerd, if it's html event or what/ Then I'd like to throttle those events, check if track is assigned to a correct field in @for, check if OnPush staretgy is enabled (eager would be reacting on all events across the whole application), I'd check @Defer how the load the code - maybe they should be loaded since very beginning, no asynchronously. ",
+      "evaluation": {
+        "score": "6/10",
+        "verdict": "Good",
+        "feedback": "Good instincts on process: measure first, look at which events fire, debounce/throttle the filter input, verify @for tracks a stable identity (track item.id, not index or object identity), and check OnPush — your point that default strategy re-checks everything on any event anywhere is exactly the motivation. Refinements: for change-detection jank specifically, the Angular DevTools profiler beats Lighthouse — it shows which components get re-checked per tick and how long each takes, pointing straight at the hot subtree. The @defer point came out inverted: @defer helps this page by NOT shipping/rendering heavy below-the-fold widgets up front (charts, comment sections), not by loading things eagerly. And the two levers you skipped are usually the actual fix here: (1) move work out of templates — a function call in a binding like {{ filter(items) }} re-runs on EVERY change-detection pass; replace with a computed signal or pure pipe that caches; (2) virtual scrolling (cdk-virtual-scroll-viewport) so a 10k-row list keeps only the ~20 visible rows in the DOM — that's what kills the scroll stutter."
+      },
+      "followUp": "Template has {{ filterItems() }} under default change detection. Why can that single binding jank the whole app while typing, and how do a computed signal and a pure pipe each avoid the re-computation — what do they memoize on?",
+      "answeredAt": "2026-07-19T02:04:04.891Z"
+    },
+    "Explain hot vs cold Observables, and compare Subject, BehaviorSubject, ReplaySubject and AsyncSubject. For a stream of live price updates that new subscribers should join with the latest known price, which do you pick and why?",
+    "What do the `share()` and `shareReplay()` operators do, and what problem do they solve when several components subscribe to the same HTTP-backed Observable? Explain the refCount behavior and the classic `shareReplay(1)` memory-leak pitfall with long-lived sources.",
+    "How would you consume a WebSocket in Angular using RxJS `webSocket()` / `WebSocketSubject`? Cover multiplexing several instrument subscriptions over one connection, automatic reconnection with `retry`/backoff, and how you detect and resync missed data after a reconnect.",
+    "A WebSocket pushes hundreds of price ticks per second, but the UI only needs to look smooth. Compare `throttleTime`, `auditTime`, `sampleTime`, `debounceTime` and `bufferTime` for taming the stream — which fits a live price cell, and how do you combine this with OnPush/signals so that one hot instrument doesn't re-render the whole watchlist?"
   ]
 }

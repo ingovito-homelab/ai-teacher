@@ -1,0 +1,17 @@
+{
+  "id": "data-structures",
+  "title": "Data Structures",
+  "description": "The Java collections framework beyond HashMap and ArrayList — choosing and understanding the right structure",
+  "questions": [
+    "Sketch the Java collections framework hierarchy: Collection, List, Set, Queue/Deque, and the separate Map branch. Why is Map not a Collection, and what do the skeleton classes like AbstractList give implementors?",
+    "Give the time complexity (and the reason for it) of the core operations — add, remove, contains, get — for ArrayList, HashSet, TreeSet and ArrayDeque. Where does amortized O(1) come from in ArrayList's add?",
+    "How does TreeMap work internally (red-black tree)? What does it offer that HashMap cannot — sorted iteration, floorKey/ceilingKey, subMap/headMap — and give a concrete use case, e.g. an order book keyed by price.",
+    "Compare HashSet, LinkedHashSet and TreeSet: how is each implemented on top of a Map, what iteration order does each guarantee, and what requirements do they place on the elements (hashCode/equals vs Comparable)?",
+    "What is LinkedHashMap's access-order mode, and how does overriding removeEldestEntry turn it into an LRU cache? Sketch the implementation and explain why the doubly-linked list makes both lookup and order maintenance O(1).",
+    "How does PriorityQueue work — what is a binary heap, and how do offer/poll maintain the heap property in O(log n)? Why does iterating a PriorityQueue NOT return elements in sorted order, and what happens if you mutate a field that affects an element's priority while it sits in the queue?",
+    "Why does the Javadoc recommend ArrayDeque over Stack and LinkedList for stack/queue usage? Explain what is wrong with the legacy Stack class, and how ArrayDeque's circular array works.",
+    "Explain EnumMap and EnumSet: how are they implemented under the hood (array indexed by ordinal, bit vector), and why are they strictly better than HashMap/HashSet when keys are enum constants?",
+    "How does CopyOnWriteArrayList work, and what read/write cost profile does that give it? When is it the right choice (e.g. a listener list), when is it a disaster, and how do its iterators behave during concurrent modification?",
+    "Compare the immutable collection factories (List.of, Map.of, Set.of) with Collections.unmodifiableList and with a defensive copy (List.copyOf). What is the difference between an unmodifiable view and a truly immutable collection, and how does each react to nulls and to changes in the source?"
+  ]
+}

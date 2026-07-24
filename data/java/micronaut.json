@@ -1,0 +1,29 @@
+{
+  "id": "micronaut",
+  "title": "Micronaut",
+  "description": "Micronaut framework: compile-time DI, HTTP server and clients, AOP, data access, resilience and GraalVM.",
+  "questions": [
+    "What is Micronaut and what problems with traditional JVM frameworks (like classic Spring) was it designed to solve? Name its three headline characteristics.",
+    "Micronaut performs dependency injection at compile time using annotation processors. Explain what that means concretely — what is generated during compilation, and what does the framework NOT have to do at runtime compared to a reflection-based container?",
+    "Walk through the main bean scopes in Micronaut: `@Singleton`, `@Prototype`, `@RequestScope` and `@Context`. When is a `@Singleton` bean actually created, and how does `@Context` change that?",
+    "How do you define beans for classes you don't own (e.g. from a third-party library)? Explain `@Factory` classes and `@Bean` methods, and how injection points (constructor vs field) work with `@Inject`.",
+    "What does the `@Requires` annotation do? Give three different kinds of conditions it supports (e.g. property, class on classpath, environment) and explain how conditional beans enable Micronaut's modular configuration.",
+    "Compare the ways to consume configuration in Micronaut: `@Value`, `@Property` and `@ConfigurationProperties` classes. When would you choose type-safe configuration binding, and how does it get validated?",
+    "How do environments work in Micronaut (e.g. `dev`, `test`, `cloud`)? How are environment-specific configuration files resolved, and how does `@Requires(env = ...)` interact with them?",
+    "Describe how an HTTP endpoint is built in Micronaut: `@Controller`, method annotations like `@Get`/`@Post`, and argument binding (path variables, query params, request body). How does routing differ from Spring MVC's runtime handler mapping?",
+    "What is a declarative HTTP client (`@Client` on an interface)? Explain what Micronaut generates for it, how it integrates with service discovery via service IDs, and why this beats hand-writing HTTP calls.",
+    "Explain server and client filters (`HttpServerFilter` / `HttpClientFilter`): what are they for, how do you control their order and the paths they apply to, and what are typical use cases?",
+    "How does error handling work in Micronaut controllers? Compare local and global `@Error` handlers and `ExceptionHandler` beans — when would you use each?",
+    "How does validation work in Micronaut (`@Valid`, `@Validated`, jakarta.validation annotations)? What part of the validation support is done at compile time, and what does that buy you?",
+    "Explain AOP in Micronaut: how do you write a `MethodInterceptor` with an `@Around` annotation, and how do Micronaut's compile-time proxies differ from Spring's runtime JDK/CGLIB proxies (including the self-invocation problem)?",
+    "What is Micronaut Data and how does it differ fundamentally from Spring Data? Explain what happens to a repository interface method like `findByNameAndAgeGreaterThan` at compile time, and why that helps both performance and correctness.",
+    "Micronaut's HTTP server is built on Netty's event loop. Why must you never block the event loop, how do you mark blocking work with `@ExecuteOn(TaskExecutors.BLOCKING)`, and what happens when a controller returns a reactive type like `Mono`/`Publisher`?",
+    "Describe Micronaut's built-in resilience features: `@Retryable`, `@CircuitBreaker` and `@Fallback`. How does each behave, and where would you apply them in a microservice calling other services?",
+    "Why is Micronaut particularly well suited to GraalVM native image? Explain what reflection-heavy frameworks struggle with under native image, and what Micronaut's ahead-of-time approach avoids.",
+    "What does `@Introspected` do? Explain bean introspection: why Micronaut needs its own reflection-free way to read/write bean properties, and where it is used (serialization, validation, Micronaut Data).",
+    "How do you test a Micronaut application? Explain `@MicronautTest` (what it starts, how injection works in tests), replacing collaborators with `@MockBean`, and testing a controller through the embedded server with an injected `@Client`.",
+    "What do Micronaut's management endpoints provide (health, metrics, refresh, etc.)? How do you enable and secure them, and how does Micronaut integrate with Micrometer for metrics export?",
+    "How does Micronaut integrate with Kafka and RabbitMQ (`@KafkaListener`, `@KafkaClient`, `@RabbitListener`)? Explain what the annotation processor generates, how consumer concurrency and error handling are configured, and how you would test messaging code with Testcontainers.",
+    "How does transaction management work in Micronaut with Micronaut Data and JDBC? Explain `@Transactional` (jakarta vs Micronaut's own), how it decides commit vs rollback on exceptions, how it composes with `@KafkaListener` consumers, and why there is no self-invocation proxy problem like in Spring."
+  ]
+}

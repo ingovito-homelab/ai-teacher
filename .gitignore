@@ -4,6 +4,13 @@ node_modules/
 # Build output
 dist/
 
+# SQLite database and evaluator work files (generated at runtime)
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/_pending.json
+data/_evaluations.json
+
 # Logs
 *.log
 npm-debug.log*

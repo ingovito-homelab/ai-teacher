@@ -1,0 +1,42 @@
+{
+  "id": "http",
+  "title": "HTTP",
+  "description": "HTTP protocol fundamentals: methods, semantics, headers, caching and protocol evolution.",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the difference between idempotent and safe HTTP methods? Give examples of methods that are safe, idempotent-but-not-safe, and neither.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q2",
+      "question": "Explain the main categories of HTTP status codes (1xx–5xx). When would you return 401 vs 403, and 400 vs 422?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q3",
+      "question": "How does HTTP caching work? Explain the roles of Cache-Control, ETag and Last-Modified, and describe what a conditional request (304 Not Modified) flow looks like.",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q4",
+      "question": "HTTP is stateless — what does that mean in practice, and what mechanisms are used to maintain sessions on top of it? Compare cookie-based sessions with token-based approaches (e.g. JWT in an Authorization header).",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    },
+    {
+      "id": "q5",
+      "question": "Compare HTTP/1.1, HTTP/2 and HTTP/3. What problems does each newer version solve (e.g. head-of-line blocking, multiplexing), and how does the transport layer change in HTTP/3?",
+      "answer": "",
+      "evaluation": null,
+      "followUp": null
+    }
+  ]
+}

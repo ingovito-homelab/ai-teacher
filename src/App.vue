@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { listSections, getSection, saveAnswers, clearLowScores, setHidden, setAssistRequired, clearExplanation, getActivity } from './api'
+import { listSections, getSection, saveAnswers, clearLowScores, setHidden, setAssistRequired, requestExplanationUpdate, clearExplanation, getActivity } from './api'
 import { parseScore } from './score'
 import QuestionCard from './components/QuestionCard.vue'
 import ActivityChart from './components/ActivityChart.vue'
@@ -291,6 +291,20 @@ async function toggleAssist(question) {
   }
 }
 
+async function requestExplanation(question, mode, context) {
+  if (!currentId.value) return
+  try {
+    section.value = await requestExplanationUpdate(currentId.value, question.id, mode, context)
+    setStatus(
+      mode === 'examples'
+        ? 'Examples requested — run the evaluator to add them.'
+        : 'Deeper explanation requested — run the evaluator to expand it.'
+    )
+  } catch (e) {
+    setStatus(`Error: ${e.message}`, true)
+  }
+}
+
 async function removeExplanation(question) {
   if (!currentId.value) return
   try {
@@ -451,6 +465,7 @@ onMounted(async () => {
           :index="i"
           v-model="answers[q.id]"
           @toggle-assist="toggleAssist(q)"
+          @request-explanation="requestExplanation(q, $event.mode, $event.context)"
           @remove-explanation="removeExplanation(q)"
         />
         <p v-if="!visibleQuestions.length" class="empty">All questions answered well — nothing left to show 🎉</p>

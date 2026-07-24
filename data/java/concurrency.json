@@ -1,0 +1,21 @@
+{
+  "id": "concurrency",
+  "title": "Concurrency",
+  "description": "Threads, executors, synchronizers and concurrent programming patterns beyond the basics",
+  "questions": [
+    "What is the difference between a process and a thread, and what does a `Thread` in Java map to at the OS level? Why is creating platform threads expensive, and what are the standard ways to start work on another thread?",
+    "Explain the lifecycle of a Java thread (NEW, RUNNABLE, BLOCKED, WAITING, TIMED_WAITING, TERMINATED). What is the difference between BLOCKED and WAITING, and which operations put a thread into each state?",
+    "What is a deadlock? Describe the four conditions required for one, show a minimal two-lock example, and explain how you would detect a deadlock in a running production JVM and how lock ordering prevents it.",
+    "How does the low-level `wait()`/`notify()`/`notifyAll()` mechanism work? Why must they be called while holding the monitor, why should `wait()` always sit in a loop checking a condition (spurious wakeups), and what higher-level tools replaced this pattern?",
+    "Explain `ExecutorService` thread pools: what do core pool size, max pool size, the work queue and the rejection policy each control? Walk through the (surprising) order in which a `ThreadPoolExecutor` uses them when tasks arrive.",
+    "How would you size a thread pool for CPU-bound work vs I/O-bound work? Explain the reasoning (Little's law intuition is fine), and what goes wrong when blocking I/O tasks run on a small shared pool like the common ForkJoinPool.",
+    "Compare `Runnable`, `Callable` and `Future`. What happens to an exception thrown inside a task submitted with `submit()` vs `execute()`, and why do thread pools sometimes 'swallow' exceptions silently?",
+    "What is compare-and-swap (CAS) and how do atomic classes use it to avoid locks? Explain the retry loop inside `AtomicInteger.incrementAndGet()`, the ABA problem, and when `LongAdder` beats `AtomicLong`.",
+    "Describe the synchronizers in `java.util.concurrent`: `CountDownLatch`, `CyclicBarrier`, `Semaphore` and `Phaser`. Give a concrete use case for each and explain which of them are reusable.",
+    "How does `BlockingQueue` support the producer–consumer pattern? Compare `ArrayBlockingQueue`, `LinkedBlockingQueue` and `SynchronousQueue`, and explain what backpressure means in this context and how a bounded queue provides it.",
+    "How does thread interruption work in Java? What does `interrupt()` actually do, what is the difference between `isInterrupted()` and `Thread.interrupted()`, and how should a well-behaved task respond to an `InterruptedException`?",
+    "What is `ThreadLocal`, how is it implemented, and where is it used in frameworks (transactions, security context, MDC)? Explain why `ThreadLocal` leaks memory in thread pools if not removed, and why it interacts badly with async code.",
+    "What is a read-write lock (`ReentrantReadWriteLock`) and when does it actually help? Explain reader starvation vs writer starvation, and what `StampedLock` adds with optimistic reads.",
+    "You have a cache accessed by many threads where computing a missing value is expensive. Compare implementations: `synchronized` map with get-then-put, `ConcurrentHashMap.computeIfAbsent`, and per-key `Future`-based memoization. What race conditions and pitfalls does each address (including recursive `computeIfAbsent`)?"
+  ]
+}

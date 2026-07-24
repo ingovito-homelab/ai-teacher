@@ -20,9 +20,14 @@
       "id": "q2",
       "question": "Explain the difference between property binding `[value]=\"x\"`, event binding `(click)=\"f()\"`, and two-way binding `[(ngModel)]=\"x\"`. What is two-way binding actually syntactic sugar for?",
       "answer": "[value]=\"x\" save value of x to the child component\n(click)=\"f()\" will trigger function f when click event is triggered. \nTwo way binding [(ngModel] will bind it two way - first it will set the value from the parent component (that declare eg. <input [(ngModel)]=\"x\">, second it will enable saving to the x from that component. So the child component has the possibility to mutate the x because it's a two way binding. So instead of [NgModel] and input binding and handlin ngModelChange=(event) => x = event.value) we'll have a combination of both.",
-      "evaluation": null,
-      "followUp": null,
-      "answeredAt": "2026-07-17T23:56:16.104Z"
+      "evaluation": {
+        "score": "7/10",
+        "verdict": "Good",
+        "feedback": "All three bindings are correctly characterized: [value]=\"x\" pushes the parent expression into the child's property one-way (and re-evaluates when x changes), (click)=\"f()\" runs the handler on the DOM/child event, and [(ngModel)] is both directions combined so the child can effectively update x. The sugar expansion is the right idea but worth writing exactly: [(ngModel)]=\"x\" desugars to [ngModel]=\"x\" (ngModelChange)=\"x = $event\" — note $event IS the new value itself, not event.value. And the pattern generalizes beyond ngModel: any [(prop)]=\"x\" expands to [prop]=\"x\" (propChange)=\"x = $event\", which is why a custom component supports two-way binding simply by pairing an input `prop` with an output named `propChange`. One nuance: 'save value to the child component' — property binding targets either a DOM property or a child @Input, and it's one-way; the child mutating that value never writes back to x without the Change output."
+      },
+      "followUp": "You want your own <app-slider> to support [(value)]. What exactly must you declare with the decorator style (names matter), and how does the model() signal function collapse that boilerplate?",
+      "answeredAt": "2026-07-17T23:56:16.104Z",
+      "hidden": true
     },
     {
       "id": "q3",
@@ -40,38 +45,67 @@
     {
       "id": "q4",
       "question": "How does Angular's dependency injection work? Explain what an injector is, what `providedIn: 'root'` means, and what changes when you instead list a service in a component's `providers` array.",
-      "answer": "Help",
-      "evaluation": null,
-      "followUp": null,
-      "answeredAt": "2026-07-17T12:00:00.000Z"
+      "answer": "Dependency injection is a system when component define what kind of service it needs and angular provides it via incjetor. If the service is defined with providedIn: \"root\" and component doesnt include that service into its providers - service will be injected by root injector. \n\nBy default we starts to look for the injector from the component, its parent & grandparents - if there's no provider defined then we use a root injector. \n\nIf you list a service in te 'providers' array angular will create an injector for every component created. So the component will have it's own service that would be shared only with its descendants (unless they list that service in their providers) - so if it's listen then the creation happens per component. ",
+      "evaluation": {
+        "score": "8/10",
+        "verdict": "Good",
+        "feedback": "Solid. You've got the three key mechanics: providedIn:'root' registers the service with the application-wide root injector (one shared instance), resolution walks up the injector tree from the component through its ancestors to root, and listing a service in a component's providers gives that component and its subtree their own instance. Two precision points. First, 'angular will create an injector for every component' — Angular creates a node injector per component anyway; what the providers array changes is that YOUR service gets a fresh instance at that level, shadowing any instance above, created per component instance and destroyed with it. Second, providedIn:'root' has one more property worth naming: it is tree-shakable — the service is only bundled if something actually injects it, unlike services listed eagerly in a providers array. Also know there are two injector hierarchies: element injectors (the component tree you described) and environment injectors (root, plus one per lazy-loaded route that declares route-level providers)."
+      },
+      "followUp": "Injection lookup can be tuned with resolution modifiers: what do @Self(), @SkipSelf(), @Optional() and @Host() each change about the lookup walk, and give one concrete use case for @SkipSelf() in a hierarchical service setup?",
+      "answeredAt": "2026-07-19T02:48:31.877Z",
+      "hidden": true
     },
     {
       "id": "q5",
       "question": "Compare constructor injection with the `inject()` function. Why has `inject()` become the recommended style, and in which contexts can `inject()` be called at all (what is an 'injection context')?",
-      "answer": "",
-      "evaluation": null,
-      "followUp": null
+      "answer": "Constructor injection is a legacy angular way of injecting the service. Inject function is more flexible, easier to mock. It can be called in the context of the component. ",
+      "evaluation": {
+        "score": "4/10",
+        "verdict": "Partially correct",
+        "feedback": "'More flexible' points the right way, but almost everything the question asked for is missing, and one claim is off. Constructor injection is not 'legacy' — it still works and is fully supported; inject() is recommended because: (1) less boilerplate and better type inference (no @Inject decorator needed for token types), (2) it works in field initializers (private http = inject(HttpClient)), (3) it composes into plain reusable functions — e.g. an injectCurrentUser() helper — and (4) it survives class inheritance without re-declaring and passing constructor params through super(). The key missing concept is the injection context: inject() only works while Angular is constructing something via DI — constructor bodies and field initializers of components/directives/pipes/services, factory providers, and functional guards/resolvers/interceptors. Calling it later (in ngOnInit, a click handler, a setTimeout) throws error NG0203. Escape hatch: capture an Injector and wrap the call in runInInjectionContext(injector, () => ...)."
+      },
+      "followUp": "You need to call a helper that uses inject() from inside an event handler that runs long after construction. Show how runInInjectionContext plus a captured Injector makes that legal, and explain why Angular imposes the injection-context restriction at all.",
+      "answeredAt": "2026-07-19T02:48:31.877Z"
     },
     {
       "id": "q6",
       "question": "Walk through the component lifecycle: what are `ngOnInit`, `ngOnChanges`, `ngAfterViewInit` and `ngOnDestroy` for, and why is initialization logic usually put in `ngOnInit` rather than the constructor?",
-      "answer": "",
-      "evaluation": null,
-      "followUp": null
+      "answer": "Component lifecycle are cycle of angular. There 6 of them, \nngOnInit, ngAfterViewInit, ngBeforeInit, ngOnDestroy and I don't remember the rest. ngOnChanges is triggered every time the component is being changed. ngOnInit is triggered after everything was initialized so we can run its initialization without being afraid of unlaoded services etc.",
+      "evaluation": {
+        "score": "3/10",
+        "verdict": "Partially correct",
+        "feedback": "The one solid part: ngOnInit runs after the component's inputs are set, so initialization depending on them belongs there. The rest needs correcting. There is no ngBeforeInit. 'ngOnChanges is triggered every time the component is being changed' is wrong — it fires only when a data-bound @Input property changes (and once before ngOnInit), receiving a SimpleChanges map; internal state changes never trigger it. The actual order: constructor -> ngOnChanges (first call delivers initial inputs) -> ngOnInit (once) -> ngDoCheck -> ngAfterContentInit -> ngAfterContentChecked -> ngAfterViewInit (view children ready; @ViewChild usable from here) -> ngAfterViewChecked -> ngOnDestroy (cleanup: unsubscribe, clear timers, detach listeners). And the constructor point is not about 'unloaded services' — injected services ARE available in the constructor; the reason to prefer ngOnInit is that @Input values are still undefined in the constructor, and the constructor should stay a cheap DI-wiring spot with no real work."
+      },
+      "followUp": "Why can't you read a @ViewChild reference in ngOnInit, and what error (name it) do you risk when you synchronously change bound state inside ngAfterViewInit — and how do you fix it?",
+      "answeredAt": "2026-07-19T02:48:31.878Z"
     },
     {
       "id": "q7",
       "question": "What is the difference between a structural directive and an attribute directive? Give an example of each and explain what the `*` prefix (e.g. in `*ngIf`) tells the compiler to do.",
-      "answer": "",
-      "evaluation": null,
-      "followUp": null
+      "answer": "structural directive will influence the template, whethere something is renddered or not - have the impact into dom. Attribute directive will change the config/  attributes of the component.  (In the assist pls include all of the directives)",
+      "evaluation": {
+        "score": "5/10",
+        "verdict": "Partially correct",
+        "feedback": "Right split: structural directives change the DOM structure — they add or remove elements (*ngIf, *ngFor) — while attribute directives change the appearance or behavior of an existing element (ngClass, ngStyle). Missing: the concrete examples and the * question. The * prefix is syntactic sugar telling the compiler to wrap the host element in an <ng-template>: *ngIf=\"cond\" becomes <ng-template [ngIf]=\"cond\">…</ng-template>. The directive then decides whether (and how many times) to stamp that template into the DOM via ViewContainerRef.createEmbeddedView(templateRef). That is why structural directives can prevent content from ever being created — the template is an inert blueprint, not rendered DOM. One correction: attribute directives change the element they sit on (its classes, styles, behavior), not 'the config of the component'. Full directive list in the explanation."
+      },
+      "followUp": "You write a custom *appRepeat=\"3\" structural directive. Which two things must be injected into it, and which of them represents the content between the tags versus the place to render it?",
+      "assistRequired": true,
+      "answeredAt": "2026-07-19T02:48:31.878Z",
+      "explanation": "<p>Two directive families: <strong>structural</strong> — reshape the DOM by adding/removing elements; <strong>attribute</strong> — change the look or behavior of an existing element.</p><ul><li><strong>Structural (all of them):</strong> <code>*ngIf</code> (create/destroy conditionally), <code>*ngFor</code> (repeat per list item), <code>*ngSwitchCase</code> / <code>*ngSwitchDefault</code> (render one branch). The modern control flow <code>@if</code>/<code>@for</code>/<code>@switch</code> replaces them in new templates.</li><li><strong>Attribute (built-ins):</strong> <code>ngClass</code> (toggle CSS classes), <code>ngStyle</code> (inline styles), <code>ngModel</code> (forms two-way binding), and <code>[ngSwitch]</code> itself, which coordinates its structural cases.</li></ul><p>What <code>*</code> tells the compiler — wrap the element in an <code>&lt;ng-template&gt;</code>:</p><pre><code>&lt;div *ngIf=\"user\"&gt;{{ user.name }}&lt;/div&gt;\n\n&lt;!-- desugars to --&gt;\n&lt;ng-template [ngIf]=\"user\"&gt;\n  &lt;div&gt;{{ user.name }}&lt;/div&gt;\n&lt;/ng-template&gt;</code></pre><p>Takeaway: a structural directive receives the blueprint (<code>TemplateRef</code>) and a slot to stamp it into (<code>ViewContainerRef</code>) — rendering zero, one, or many copies.</p>"
     },
     {
       "id": "q8",
       "question": "Explain how the Angular Router matches a URL to a component. Cover route configuration, route parameters (`/users/:id`), and lazy loading a route with `loadComponent`/`loadChildren` — why does lazy loading matter for startup time?",
-      "answer": "",
-      "evaluation": null,
-      "followUp": null
+      "answer": "So the router will look for the match first and then uses the best match / the first one of there re more matches. \n\nloadComponent with load them lazily when being triggerd. ",
+      "evaluation": {
+        "score": "3/10",
+        "verdict": "Partially correct",
+        "feedback": "Two true sentences — the router picks the first matching route in config order, and loadComponent defers loading until the route is visited — but the question asked for the mechanics. Missing: (1) route configuration is an array of {path, component} objects matched top-to-bottom against URL segments, with '' as default and the '**' wildcard last — that ordering is exactly why 'first match wins' matters. (2) Route parameters: path 'users/:id' captures a segment; the component reads it via ActivatedRoute (snapshot.paramMap.get('id') or the paramMap observable), or directly as an @Input with withComponentInputBinding(). (3) Why lazy loading helps startup: loadComponent/loadChildren use a dynamic import(), so the bundler splits that code into a separate chunk — the initial bundle the browser must download, parse and execute before first paint stays small, and the chunk is only fetched on navigation. Full picture with code in the explanation."
+      },
+      "followUp": "User navigates from /users/1 to /users/2. Does Angular destroy and recreate the component? Given the answer, why does reading the id once via route.snapshot break here, and which pattern fixes it?",
+      "assistRequired": true,
+      "answeredAt": "2026-07-19T02:48:31.878Z",
+      "explanation": "<p>The router matches URL segments against the routes array top-to-bottom — <strong>first match wins</strong>, so specific paths go before the <code>**</code> wildcard.</p><pre><code>export const routes: Routes = [\n  { path: '', component: HomeComponent },\n  { path: 'users/:id',\n    loadComponent: () =&gt; import('./user.component').then(m =&gt; m.UserComponent) },\n  { path: 'admin',\n    loadChildren: () =&gt; import('./admin/routes').then(m =&gt; m.ADMIN_ROUTES) },\n  { path: '**', component: NotFoundComponent }\n];</code></pre><p><code>:id</code> is a route parameter — read it with <code>inject(ActivatedRoute).snapshot.paramMap.get('id')</code>, with the <code>paramMap</code> observable (keeps working when only the param changes), or as a plain <code>@Input() id</code> when <code>withComponentInputBinding()</code> is enabled.</p><p><strong>Why lazy loading matters for startup:</strong> <code>loadComponent</code>/<code>loadChildren</code> use dynamic <code>import()</code>, so the bundler emits that code as a separate chunk. The initial bundle — everything the browser must download, parse and execute before first paint — stays small; the chunk is fetched only when the user actually navigates there. <code>loadComponent</code> lazy-loads one standalone component; <code>loadChildren</code> a whole route subtree with its own providers.</p>"
     }
   ]
 }
